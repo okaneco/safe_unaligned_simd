@@ -1,0 +1,30 @@
+[package]
+name = "safe_unaligned_simd"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.87"
+license = "MIT OR Apache-2.0"
+exclude = [".github", ""]
+
+description = "Safe SIMD wrappers for unaligned load and store operations."
+homepage = ""
+repository = ""
+readme = "README.md"
+
+keywords = ["simd", "vector", "unaligned", "load", "store"]
+categories = ["hardware-support", "api-bindings", "no-std"]
+
+[dependencies]
+
+[dev-dependencies]
+
+[features]
+default = []
+
+# Internal feature for target-feature testing
+_avx_test = []
+
+[package.metadata.docs.rs]
+no-default-features = true
+features = [""]
+targets = []
