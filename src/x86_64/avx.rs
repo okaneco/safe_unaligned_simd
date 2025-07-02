@@ -1,7 +1,58 @@
-use core::arch::x86_64::{self as arch, __m256, __m256d, __m256i};
+use core::arch::x86_64::{self as arch, __m128, __m128d, __m256, __m256d, __m256i};
 use core::ptr;
 
 use crate::x86_64::{Is128BitsUnaligned, Is256BitsUnaligned};
+
+/// Broadcasts 128 bits from memory (composed of 2 packed double-precision
+/// (64-bit) floating-point elements) to all elements of the returned vector.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_broadcast_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_broadcast_pd(mem_addr: &__m128d) -> __m256d {
+    // FIXME: Broadcast intrinsics should be marked safe in the near future
+    unsafe { arch::_mm256_broadcast_pd(mem_addr) }
+}
+
+/// Broadcasts 128 bits from memory (composed of 4 packed single-precision
+/// (32-bit) floating-point elements) to all elements of the returned vector.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_broadcast_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_broadcast_ps(mem_addr: &__m128) -> __m256 {
+    unsafe { arch::_mm256_broadcast_ps(mem_addr) }
+}
+
+/// Broadcasts a double-precision (64-bit) floating-point element from memory
+/// to all elements of the returned vector.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_broadcast_sd)
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_broadcast_sd(mem_addr: &f64) -> __m256d {
+    unsafe { arch::_mm256_broadcast_sd(mem_addr) }
+}
+
+/// Broadcasts a single-precision (32-bit) floating-point element from memory
+/// to all elements of the returned vector.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_broadcast_ss)
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm_broadcast_ss(mem_addr: &f32) -> __m128 {
+    unsafe { arch::_mm_broadcast_ss(mem_addr) }
+}
+
+/// Broadcasts a single-precision (32-bit) floating-point element from memory
+/// to all elements of the returned vector.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_broadcast_ss)
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_broadcast_ss(mem_addr: &f32) -> __m256 {
+    unsafe { arch::_mm256_broadcast_ss(mem_addr) }
+}
 
 /// Loads 256-bits (composed of 4 packed double-precision (64-bit)
 /// floating-point elements) from memory into result.
@@ -135,7 +186,7 @@ pub fn _mm256_storeu2_m128i<T: Is128BitsUnaligned>(hiaddr: &mut T, loaddr: &mut 
 #[cfg(feature = "_avx_test")]
 #[cfg(test)]
 mod tests {
-    use core::arch::x86_64::{self as arch, __m256, __m256d, __m256i};
+    use core::arch::x86_64::{self as arch, __m128, __m256, __m256d, __m256i};
 
     // Fail-safe for tests being run on a CPU that doesn't support `avx`
     static CPU_HAS_AVX: std::sync::LazyLock<bool> =
@@ -157,6 +208,90 @@ mod tests {
         let a: [u8; 32] = unsafe { core::mem::transmute(a) };
         let b: [u8; 32] = unsafe { core::mem::transmute(b) };
         assert_eq!(a, b)
+    }
+
+    fn assert_eq_m128(a: __m128, b: __m128) {
+        let a: [u8; 16] = unsafe { core::mem::transmute(a) };
+        let b: [u8; 16] = unsafe { core::mem::transmute(b) };
+        assert_eq!(a, b)
+    }
+
+    //
+    #[test]
+    fn test_mm256_broadcast_pd() {
+        assert!(*CPU_HAS_AVX);
+
+        unsafe { test() }
+
+        #[target_feature(enable = "avx")]
+        fn test() {
+            let a = arch::_mm_setr_pd(4.0, 3.0);
+            let r = super::_mm256_broadcast_pd(&a);
+            let target = arch::_mm256_setr_pd(4.0, 3.0, 4.0, 3.0);
+
+            assert_eq_m256d(r, target);
+        }
+    }
+
+    #[test]
+    fn test_mm256_broadcast_ps() {
+        assert!(*CPU_HAS_AVX);
+
+        unsafe { test() }
+
+        #[target_feature(enable = "avx")]
+        fn test() {
+            let a = arch::_mm_setr_ps(4.0, 3.0, 2.0, 5.0);
+            let r = super::_mm256_broadcast_ps(&a);
+            let target = arch::_mm256_setr_ps(4.0, 3.0, 2.0, 5.0, 4.0, 3.0, 2.0, 5.0);
+
+            assert_eq_m256(r, target);
+        }
+    }
+
+    #[test]
+    fn test_mm256_broadcast_sd() {
+        assert!(*CPU_HAS_AVX);
+
+        unsafe { test() }
+
+        #[target_feature(enable = "avx")]
+        fn test() {
+            let r = super::_mm256_broadcast_sd(&3.0);
+            let target = arch::_mm256_set1_pd(3.0);
+
+            assert_eq_m256d(r, target);
+        }
+    }
+
+    #[test]
+    fn test_mm_broadcast_ss() {
+        assert!(*CPU_HAS_AVX);
+
+        unsafe { test() }
+
+        #[target_feature(enable = "avx")]
+        fn test() {
+            let r = super::_mm_broadcast_ss(&3.0);
+            let target = arch::_mm_set1_ps(3.0);
+
+            assert_eq_m128(r, target);
+        }
+    }
+
+    #[test]
+    fn test_mm256_broadcast_ss() {
+        assert!(*CPU_HAS_AVX);
+
+        unsafe { test() }
+
+        #[target_feature(enable = "avx")]
+        fn test() {
+            let r = super::_mm256_broadcast_ss(&3.0);
+            let target = arch::_mm256_set1_ps(3.0);
+
+            assert_eq_m256(r, target);
+        }
     }
 
     #[test]
