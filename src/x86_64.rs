@@ -21,7 +21,7 @@ mod private {
 }
 
 /// A trait that marks a type as valid for unaligned operations as [`__m128i`],
-/// an x86-specific 128-bit wide integer vector type.
+/// an x86-specific 128-bit integer vector type.
 pub trait Is128BitsUnaligned: private::Sealed {}
 
 macro_rules! impl_128_bits_traits {
@@ -44,7 +44,7 @@ impl_128_bits_traits!([u64; 2] => __m128i);
 impl_128_bits_traits!([i64; 2] => __m128i);
 
 /// A trait that marks a type as valid for unaligned operations as [`__m256i`],
-/// an x86-specific 256-bit wide integer vector type.
+/// an x86-specific 256-bit integer vector type.
 pub trait Is256BitsUnaligned: private::Sealed {}
 
 macro_rules! impl_256_bits_traits {

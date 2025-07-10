@@ -18,7 +18,7 @@
 //!
 //! ### Other platforms
 //!
-//! To be determined.
+//! Not yet supported.
 #![forbid(missing_docs, non_ascii_idents)]
 #![cfg_attr(not(test), no_std)]
 
