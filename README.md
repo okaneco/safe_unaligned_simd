@@ -1,5 +1,9 @@
 # `safe_unaligned_simd`
 
+[![Build Status](https://github.com/okaneco/safe_unaligned_simd/workflows/Rust%20CI/badge.svg)](https://github.com/okaneco/safe_unaligned_simd)
+[![Crates.io](https://img.shields.io/crates/v/safe_unaligned_simd.svg)](https://crates.io/crates/safe_unaligned_simd)
+[![Docs.rs](https://docs.rs/safe_unaligned_simd/badge.svg)](https://docs.rs/safe_unaligned_simd)
+
 Safe wrappers for unaligned SIMD load and store operations.
 
 The goal of this crate is to remove the need for "unnecessary `unsafe`" code when using vector intrinsics with no alignment requirements.
@@ -13,11 +17,21 @@ Platform-intrinsics that take raw pointers have been wrapped in functions that r
 ### `x86_64`
 - `sse`, `sse2`, `avx`
 
+Some example function signatures:
+```rust
+#[target_feature(enable = "sse")]
+fn _mm_storeu_ps(mem_addr: &mut [f32; 4], a: __m128);
+#[target_feature(enable = "sse2")]
+fn _mm_store_sd(mem_addr: &mut f64, a: __m128d);
+#[target_feature(enable = "avx")]
+fn _mm256_loadu2_m128(hiaddr: &[f32; 4], loaddr: &[f32; 4]) -> __m256;
+```
+
 Currently, there is no plan to implement gather/scatter or masked load/store intrinsics for this platform.
 
 ### Other platforms
 
-To be determined.
+Not yet supported.
 
 ## License
 This crate is licensed under either
