@@ -7,8 +7,8 @@ license = "MIT OR Apache-2.0"
 exclude = [".github", ""]
 
 description = "Safe SIMD wrappers for unaligned load and store operations."
-homepage = ""
-repository = ""
+homepage = "https://github.com/okaneco/safe_unaligned_simd"
+repository = "https://github.com/okaneco/safe_unaligned_simd"
 readme = "README.md"
 
 keywords = ["simd", "vector", "unaligned", "load", "store"]
@@ -27,4 +27,4 @@ _avx_test = []
 [package.metadata.docs.rs]
 no-default-features = true
 features = [""]
-targets = []
+targets = ["x86_64-unknown-linux-gnu"]
