@@ -10,7 +10,7 @@
 //!
 //! ## Implemented Intrinsics
 //!
-//! ### `x86_64`
+//! ### `x86`, `x86_64`
 //! - `sse`, `sse2`, `avx`
 //!
 //! Currently, there is no plan to implement gather/scatter or masked load/store
@@ -22,5 +22,15 @@
 #![forbid(missing_docs, non_ascii_idents)]
 #![cfg_attr(not(test), no_std)]
 
+#[cfg(target_arch = "x86")]
+pub mod x86;
+
 #[cfg(target_arch = "x86_64")]
-pub mod x86_64;
+mod x86;
+#[cfg(target_arch = "x86_64")]
+pub mod x86_64 {
+    //! Platform-specific intrinsics for `x86_64`.
+
+    #[cfg(target_arch = "x86_64")]
+    pub use crate::x86::*;
+}

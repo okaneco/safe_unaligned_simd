@@ -14,7 +14,7 @@ Platform-intrinsics that take raw pointers have been wrapped in functions that r
 
 ## Implemented Intrinsics
 
-### `x86_64`
+### `x86`, `x86_64`
 - `sse`, `sse2`, `avx`
 
 Some example function signatures:
