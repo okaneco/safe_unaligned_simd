@@ -1,3 +1,6 @@
+#[cfg(target_arch = "x86")]
+use core::arch::x86::{self as arch, __m128};
+#[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::{self as arch, __m128};
 
 /// Construct a [`__m128`] by duplicating the value read from `mem_addr` into
@@ -71,6 +74,9 @@ pub fn _mm_storeu_ps(mem_addr: &mut [f32; 4], a: __m128) {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(target_arch = "x86")]
+    use core::arch::x86::{self as arch, __m128};
+    #[cfg(target_arch = "x86_64")]
     use core::arch::x86_64::{self as arch, __m128};
 
     fn assert_eq_m128(a: __m128, b: __m128) {

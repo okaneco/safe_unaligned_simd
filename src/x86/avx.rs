@@ -1,6 +1,12 @@
+#[cfg(target_arch = "x86")]
+use core::arch::x86::{self as arch, __m128, __m128d, __m256, __m256d, __m256i};
+#[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::{self as arch, __m128, __m128d, __m256, __m256d, __m256i};
 use core::ptr;
 
+#[cfg(target_arch = "x86")]
+use crate::x86::{Is128BitsUnaligned, Is256BitsUnaligned};
+#[cfg(target_arch = "x86_64")]
 use crate::x86_64::{Is128BitsUnaligned, Is256BitsUnaligned};
 
 /// Broadcasts 128 bits from memory (composed of 2 packed double-precision
@@ -10,8 +16,11 @@ use crate::x86_64::{Is128BitsUnaligned, Is256BitsUnaligned};
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_broadcast_pd(mem_addr: &__m128d) -> __m256d {
-    // FIXME: Broadcast intrinsics should be marked safe in the near future
-    unsafe { arch::_mm256_broadcast_pd(mem_addr) }
+    // FIXME: Remove unsafe blocks when MSRV includes the safe version
+    #[allow(unused_unsafe)]
+    unsafe {
+        arch::_mm256_broadcast_pd(mem_addr)
+    }
 }
 
 /// Broadcasts 128 bits from memory (composed of 4 packed single-precision
@@ -21,7 +30,11 @@ pub fn _mm256_broadcast_pd(mem_addr: &__m128d) -> __m256d {
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_broadcast_ps(mem_addr: &__m128) -> __m256 {
-    unsafe { arch::_mm256_broadcast_ps(mem_addr) }
+    // FIXME: Remove unsafe blocks when MSRV includes the safe version
+    #[allow(unused_unsafe)]
+    unsafe {
+        arch::_mm256_broadcast_ps(mem_addr)
+    }
 }
 
 /// Broadcasts a double-precision (64-bit) floating-point element from memory
@@ -31,7 +44,11 @@ pub fn _mm256_broadcast_ps(mem_addr: &__m128) -> __m256 {
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_broadcast_sd(mem_addr: &f64) -> __m256d {
-    unsafe { arch::_mm256_broadcast_sd(mem_addr) }
+    // FIXME: Remove unsafe blocks when MSRV includes the safe version
+    #[allow(unused_unsafe)]
+    unsafe {
+        arch::_mm256_broadcast_sd(mem_addr)
+    }
 }
 
 /// Broadcasts a single-precision (32-bit) floating-point element from memory
@@ -41,7 +58,11 @@ pub fn _mm256_broadcast_sd(mem_addr: &f64) -> __m256d {
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm_broadcast_ss(mem_addr: &f32) -> __m128 {
-    unsafe { arch::_mm_broadcast_ss(mem_addr) }
+    // FIXME: Remove unsafe blocks when MSRV includes the safe version
+    #[allow(unused_unsafe)]
+    unsafe {
+        arch::_mm_broadcast_ss(mem_addr)
+    }
 }
 
 /// Broadcasts a single-precision (32-bit) floating-point element from memory
@@ -51,7 +72,11 @@ pub fn _mm_broadcast_ss(mem_addr: &f32) -> __m128 {
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_broadcast_ss(mem_addr: &f32) -> __m256 {
-    unsafe { arch::_mm256_broadcast_ss(mem_addr) }
+    // FIXME: Remove unsafe blocks when MSRV includes the safe version
+    #[allow(unused_unsafe)]
+    unsafe {
+        arch::_mm256_broadcast_ss(mem_addr)
+    }
 }
 
 /// Loads 256-bits (composed of 4 packed double-precision (64-bit)
@@ -186,6 +211,9 @@ pub fn _mm256_storeu2_m128i<T: Is128BitsUnaligned>(hiaddr: &mut T, loaddr: &mut 
 #[cfg(feature = "_avx_test")]
 #[cfg(test)]
 mod tests {
+    #[cfg(target_arch = "x86")]
+    use core::arch::x86::{self as arch, __m128, __m256, __m256d, __m256i};
+    #[cfg(target_arch = "x86_64")]
     use core::arch::x86_64::{self as arch, __m128, __m256, __m256d, __m256i};
 
     // Fail-safe for tests being run on a CPU that doesn't support `avx`

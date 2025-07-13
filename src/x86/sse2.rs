@@ -1,6 +1,12 @@
+#[cfg(target_arch = "x86")]
+use core::arch::x86::{self as arch, __m128d, __m128i};
+#[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::{self as arch, __m128d, __m128i};
 use core::ptr;
 
+#[cfg(target_arch = "x86")]
+use crate::x86::Is128BitsUnaligned;
+#[cfg(target_arch = "x86_64")]
 use crate::x86_64::Is128BitsUnaligned;
 
 /// Loads a double-precision (64-bit) floating-point element from memory
@@ -197,6 +203,9 @@ pub fn _mm_storeu_si64(mem_addr: &mut [u8; 8], a: __m128i) {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(target_arch = "x86")]
+    use core::arch::x86::{self as arch, __m128d, __m128i};
+    #[cfg(target_arch = "x86_64")]
     use core::arch::x86_64::{self as arch, __m128d, __m128i};
 
     // SAFETY: The `x86_64` target baseline includes `sse` and `sse2`.
