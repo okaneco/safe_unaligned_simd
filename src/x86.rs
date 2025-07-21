@@ -46,6 +46,16 @@ impl_128_bits_traits!([i32; 4] => __m128i);
 impl_128_bits_traits!([u64; 2] => __m128i);
 impl_128_bits_traits!([i64; 2] => __m128i);
 
+impl<T, const N: usize> private::Sealed for [core::cell::Cell<T>; N] where [T; N]: private::Sealed {}
+impl<T, const N: usize> private::Sealed for core::cell::Cell<[T; N]> where [T; N]: private::Sealed {}
+
+/// Marks a type as valid for unaligned operations as [`__m256i`], an x86-specific 256-bit integer
+/// vector type, on shared references.
+pub trait Is128CellUnaligned: private::Sealed {}
+
+impl<T, const N: usize> Is128CellUnaligned for [core::cell::Cell<T>; N] where [T; N]: Is128BitsUnaligned {}
+impl<T, const N: usize> Is128CellUnaligned for core::cell::Cell<[T; N]> where [T; N]: Is128BitsUnaligned {}
+
 /// A trait that marks a type as valid for unaligned operations as [`__m256i`],
 /// an x86-specific 256-bit integer vector type.
 pub trait Is256BitsUnaligned: private::Sealed {}
@@ -68,3 +78,10 @@ impl_256_bits_traits!([u32; 8] => __m256i);
 impl_256_bits_traits!([i32; 8] => __m256i);
 impl_256_bits_traits!([u64; 4] => __m256i);
 impl_256_bits_traits!([i64; 4] => __m256i);
+
+/// Marks a type as valid for unaligned operations as [`__m256i`], an x86-specific 256-bit integer
+/// vector type, on shared references.
+pub trait Is256CellUnaligned: private::Sealed {}
+
+impl<T, const N: usize> Is256CellUnaligned for [core::cell::Cell<T>; N] where [T; N]: Is256BitsUnaligned {}
+impl<T, const N: usize> Is256CellUnaligned for core::cell::Cell<[T; N]> where [T; N]: Is256BitsUnaligned {}

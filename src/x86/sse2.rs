@@ -2,12 +2,12 @@
 use core::arch::x86::{self as arch, __m128d, __m128i};
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::{self as arch, __m128d, __m128i};
-use core::{cell, ptr};
+use core::ptr;
 
 #[cfg(target_arch = "x86")]
-use crate::x86::Is128BitsUnaligned;
+use crate::x86::{Is128BitsUnaligned, Is128CellUnaligned};
 #[cfg(target_arch = "x86_64")]
-use crate::x86_64::Is128BitsUnaligned;
+use crate::x86_64::{Is128BitsUnaligned, Is128CellUnaligned};
 
 /// Loads a double-precision (64-bit) floating-point element from memory
 /// into both elements of returned vector.
@@ -64,7 +64,7 @@ pub fn _mm_loadl_epi64<T: Is128BitsUnaligned>(mem_addr: &T) -> __m128i {
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_loadl_epi64)
 #[inline]
 #[target_feature(enable = "sse2")]
-pub fn _mm_loadl_epi64_cell<T: Is128BitsUnaligned>(mem_addr: &cell::Cell<T>) -> __m128i {
+pub fn _mm_loadl_epi64_cell<T: Is128CellUnaligned>(mem_addr: &T) -> __m128i {
     unsafe { arch::_mm_loadl_epi64(ptr::from_ref(mem_addr).cast()) }
 }
 
@@ -103,8 +103,8 @@ pub fn _mm_loadu_si128<T: Is128BitsUnaligned>(mem_addr: &T) -> __m128i {
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_loadu_si128)
 #[inline]
 #[target_feature(enable = "sse2")]
-pub fn _mm_loadu_si128_cell<T: Is128BitsUnaligned>(mem_addr: &cell::Cell<T>) -> __m128i {
-    unsafe { arch::_mm_loadu_si128(ptr::from_ref(mem_addr).cast()) }
+pub fn _mm_loadu_si128_cell<T: Is128CellUnaligned>(mem_addr: &T) -> __m128i {
+    unsafe { arch::_mm_loadu_si128(ptr::from_ref(mem_addr).cast_mut().cast()) }
 }
 
 /// Loads unaligned 16-bits of integer data from memory into new vector.
@@ -168,8 +168,8 @@ pub fn _mm_storel_epi64<T: Is128BitsUnaligned>(mem_addr: &mut T, a: __m128i) {
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_storel_epi64)
 #[inline]
 #[target_feature(enable = "sse2")]
-pub fn _mm_storel_epi64_cell<T: Is128BitsUnaligned>(mem_addr: &cell::Cell<T>, a: __m128i) {
-    unsafe { arch::_mm_storel_epi64(mem_addr.as_ptr().cast(), a) }
+pub fn _mm_storel_epi64_cell<T: Is128CellUnaligned>(mem_addr: &T, a: __m128i) {
+    unsafe { arch::_mm_storel_epi64(ptr::from_ref(mem_addr).cast_mut().cast(), a) }
 }
 
 /// Stores the lower 64 bits of a 128-bit vector of `[2 x double]` to a
@@ -206,8 +206,8 @@ pub fn _mm_storeu_si128<T: Is128BitsUnaligned>(mem_addr: &mut T, a: __m128i) {
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_storeu_si128)
 #[inline]
 #[target_feature(enable = "sse2")]
-pub fn _mm_storeu_si128_cell<T: Is128BitsUnaligned>(mem_addr: &cell::Cell<T>, a: __m128i) {
-    unsafe { arch::_mm_storeu_si128(mem_addr.as_ptr().cast(), a) }
+pub fn _mm_storeu_si128_cell<T: Is128CellUnaligned>(mem_addr: &T, a: __m128i) {
+    unsafe { arch::_mm_storeu_si128(ptr::from_ref(mem_addr).cast_mut().cast(), a) }
 }
 
 /// Store 16-bit integer from the first element of `a` into memory.
@@ -429,6 +429,25 @@ mod tests {
     }
 
     #[test]
+    fn test_mm_storel_epi64_cell() {
+        unsafe { test() }
+
+        #[target_feature(enable = "sse2")]
+        fn test() {
+            let mut a = [0, 1, 2, 3, 4];
+            let val = core::cell::Cell::from_mut(&mut a[..]).as_slice_of_cells();
+
+            let load: &[_; 4] = val[..4].try_into().unwrap();
+            let store: &[_; 4] = val[1..].try_into().unwrap();
+
+            let r = super::_mm_loadu_si128_cell(load);
+            super::_mm_storeu_si128_cell(store, r);
+
+            assert_eq!(a, [0, 0, 1, 2, 3]);
+        }
+    }
+
+    #[test]
     fn test_mm_storel_pd() {
         unsafe { test() }
 
@@ -614,6 +633,25 @@ mod tests {
             let target = arch::_mm_set_epi64x(-2, -1);
 
             assert_eq_m128i(r, target);
+        }
+    }
+
+    #[test]
+    fn test_mm_loadu_si128_i64_cell() {
+        let mut a = [-1, -2, 0];
+        unsafe { test(&mut a) }
+
+        #[target_feature(enable = "sse2")]
+        fn test(a: &mut [i64; 3]) {
+            let val = core::cell::Cell::from_mut(&mut a[..]).as_slice_of_cells();
+
+            let load: &[_; 2] = val[..2].try_into().unwrap();
+            let store: &[_; 2] = val[1..].try_into().unwrap();
+
+            let r = super::_mm_loadu_si128_cell(load);
+            super::_mm_storeu_si128_cell(store, r);
+
+            assert_eq!(*a, [-1, -1, -2]);
         }
     }
 
