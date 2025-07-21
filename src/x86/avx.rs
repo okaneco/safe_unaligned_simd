@@ -2,7 +2,7 @@
 use core::arch::x86::{self as arch, __m128, __m128d, __m256, __m256d, __m256i};
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::{self as arch, __m128, __m128d, __m256, __m256d, __m256i};
-use core::ptr;
+use core::{cell, ptr};
 
 #[cfg(target_arch = "x86")]
 use crate::x86::{Is128BitsUnaligned, Is256BitsUnaligned};
@@ -108,6 +108,15 @@ pub fn _mm256_loadu_si256<T: Is256BitsUnaligned>(mem_addr: &T) -> __m256i {
     unsafe { arch::_mm256_loadu_si256(ptr::from_ref(mem_addr).cast()) }
 }
 
+/// Loads 256-bits of integer data from memory into result.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_loadu_si256)
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_loadu_si256_cell<T: Is256BitsUnaligned>(mem_addr: &cell::Cell<T>) -> __m256i {
+    unsafe { arch::_mm256_loadu_si256(ptr::from_ref(mem_addr).cast()) }
+}
+
 /// Loads two 128-bit values (composed of 4 packed single-precision (32-bit)
 /// floating-point elements) from memory, and combine them into a 256-bit
 /// value.
@@ -140,6 +149,19 @@ pub fn _mm256_loadu2_m128i<T: Is128BitsUnaligned>(hiaddr: &T, loaddr: &T) -> __m
     unsafe { arch::_mm256_loadu2_m128i(ptr::from_ref(hiaddr).cast(), ptr::from_ref(loaddr).cast()) }
 }
 
+/// Loads two 128-bit values (composed of integer data) from memory, and combine
+/// them into a 256-bit value.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_loadu2_m128i)
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_loadu2_m128i_cell<T: Is128BitsUnaligned>(
+    hiaddr: &cell::Cell<T>,
+    loaddr: &cell::Cell<T>,
+) -> __m256i {
+    unsafe { arch::_mm256_loadu2_m128i(ptr::from_ref(hiaddr).cast(), ptr::from_ref(loaddr).cast()) }
+}
+
 /// Stores 256-bits (composed of 4 packed double-precision (64-bit)
 /// floating-point elements) from `a` into memory.
 ///
@@ -168,6 +190,16 @@ pub fn _mm256_storeu_ps(mem_addr: &mut [f32; 8], a: __m256) {
 #[target_feature(enable = "avx")]
 pub fn _mm256_storeu_si256<T: Is256BitsUnaligned>(mem_addr: &mut T, a: __m256i) {
     unsafe { arch::_mm256_storeu_si256(ptr::from_mut(mem_addr).cast(), a) }
+}
+
+/// Stores 256-bits of integer data from `a` into memory.
+/// `mem_addr` does not need to be aligned on any particular boundary.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_storeu_si256)
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_storeu_si256_cell<T: Is256BitsUnaligned>(mem_addr: &cell::Cell<T>, a: __m256i) {
+    unsafe { arch::_mm256_storeu_si256(mem_addr.as_ptr().cast(), a) }
 }
 
 /// Stores the high and low 128-bit halves (each composed of 4 packed
@@ -206,6 +238,20 @@ pub fn _mm256_storeu2_m128i<T: Is128BitsUnaligned>(hiaddr: &mut T, loaddr: &mut 
             a,
         )
     }
+}
+
+/// Stores the high and low 128-bit halves (each composed of integer data) from
+/// `a` into memory two different 128-bit locations.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_storeu2_m128i)
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_storeu2_m128i_cell<T: Is128BitsUnaligned>(
+    hiaddr: &cell::Cell<T>,
+    loaddr: &cell::Cell<T>,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_storeu2_m128i(hiaddr.as_ptr().cast(), loaddr.as_ptr().cast(), a) }
 }
 
 #[cfg(feature = "_avx_test")]

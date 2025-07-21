@@ -2,7 +2,7 @@
 use core::arch::x86::{self as arch, __m128d, __m128i};
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::{self as arch, __m128d, __m128i};
-use core::ptr;
+use core::{cell, ptr};
 
 #[cfg(target_arch = "x86")]
 use crate::x86::Is128BitsUnaligned;
@@ -59,6 +59,15 @@ pub fn _mm_loadl_epi64<T: Is128BitsUnaligned>(mem_addr: &T) -> __m128i {
     unsafe { arch::_mm_loadl_epi64(ptr::from_ref(mem_addr).cast()) }
 }
 
+/// Loads a 64-bit integer from memory into first element of returned vector.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_loadl_epi64)
+#[inline]
+#[target_feature(enable = "sse2")]
+pub fn _mm_loadl_epi64_cell<T: Is128BitsUnaligned>(mem_addr: &cell::Cell<T>) -> __m128i {
+    unsafe { arch::_mm_loadl_epi64(ptr::from_ref(mem_addr).cast()) }
+}
+
 /// Loads a double-precision value into the low-order bits of a 128-bit
 /// vector of `[2 x double]`. The high-order bits are copied from the
 /// high-order bits of the first operand.
@@ -86,6 +95,15 @@ pub fn _mm_loadu_pd(mem_addr: &[f64; 2]) -> __m128d {
 #[inline]
 #[target_feature(enable = "sse2")]
 pub fn _mm_loadu_si128<T: Is128BitsUnaligned>(mem_addr: &T) -> __m128i {
+    unsafe { arch::_mm_loadu_si128(ptr::from_ref(mem_addr).cast()) }
+}
+
+/// Loads 128-bits of integer data from memory into a new vector.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_loadu_si128)
+#[inline]
+#[target_feature(enable = "sse2")]
+pub fn _mm_loadu_si128_cell<T: Is128BitsUnaligned>(mem_addr: &cell::Cell<T>) -> __m128i {
     unsafe { arch::_mm_loadu_si128(ptr::from_ref(mem_addr).cast()) }
 }
 
@@ -145,6 +163,15 @@ pub fn _mm_storel_epi64<T: Is128BitsUnaligned>(mem_addr: &mut T, a: __m128i) {
     unsafe { arch::_mm_storel_epi64(ptr::from_mut(mem_addr).cast(), a) }
 }
 
+/// Stores the lower 64-bit integer `a` to a memory location.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_storel_epi64)
+#[inline]
+#[target_feature(enable = "sse2")]
+pub fn _mm_storel_epi64_cell<T: Is128BitsUnaligned>(mem_addr: &cell::Cell<T>, a: __m128i) {
+    unsafe { arch::_mm_storel_epi64(mem_addr.as_ptr().cast(), a) }
+}
+
 /// Stores the lower 64 bits of a 128-bit vector of `[2 x double]` to a
 /// memory location.
 ///
@@ -172,6 +199,15 @@ pub fn _mm_storeu_pd(mem_addr: &mut [f64; 2], a: __m128d) {
 #[target_feature(enable = "sse2")]
 pub fn _mm_storeu_si128<T: Is128BitsUnaligned>(mem_addr: &mut T, a: __m128i) {
     unsafe { arch::_mm_storeu_si128(ptr::from_mut(mem_addr).cast(), a) }
+}
+
+/// Stores 128-bits of integer data from `a` into memory.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_storeu_si128)
+#[inline]
+#[target_feature(enable = "sse2")]
+pub fn _mm_storeu_si128_cell<T: Is128BitsUnaligned>(mem_addr: &cell::Cell<T>, a: __m128i) {
+    unsafe { arch::_mm_storeu_si128(mem_addr.as_ptr().cast(), a) }
 }
 
 /// Store 16-bit integer from the first element of `a` into memory.
