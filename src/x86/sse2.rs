@@ -316,6 +316,21 @@ mod tests {
     }
 
     #[test]
+    fn test_mm_loadl_epi64_cell() {
+        let mut a = [20, 25];
+        unsafe { test(&mut a) }
+
+        #[target_feature(enable = "sse2")]
+        fn test(a: &mut [i64; 2]) {
+            let val = core::cell::Cell::from_mut(a);
+            let r = super::_mm_loadl_epi64_cell(val);
+            let target = arch::_mm_set_epi64x(0, 20);
+
+            assert_eq_m128i(r, target)
+        }
+    }
+
+    #[test]
     fn test_mm_loadl_pd() {
         unsafe { test() }
 
@@ -423,6 +438,21 @@ mod tests {
             let a = arch::_mm_set_epi64x(i64::MIN, i64::MAX);
             let mut x = [0; 2];
             super::_mm_storel_epi64(&mut x, a);
+
+            assert_eq!(x[0], i64::MAX);
+        }
+    }
+
+    #[test]
+    fn test_mm_storel_epi64_cell() {
+        unsafe { test() }
+
+        #[target_feature(enable = "sse2")]
+        fn test() {
+            let a = arch::_mm_set_epi64x(i64::MIN, i64::MAX);
+            let mut x = [0; 2];
+            let val = core::cell::Cell::from_mut(&mut x);
+            super::_mm_storel_epi64_cell(val, a);
 
             assert_eq!(x[0], i64::MAX);
         }
