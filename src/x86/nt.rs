@@ -1,10 +1,14 @@
 //! Non-temporal store operations.
-use core::marker::PhantomData;
+use core::{marker::PhantomData, ptr};
 
 #[cfg(target_arch = "x86")]
-use core::arch::x86::{self as arch, __m256i, _mm_sfence};
+use core::arch::x86::{
+    self as arch, __m128, __m128d, __m128i, __m256, __m256d, __m256i, _mm_sfence,
+};
 #[cfg(target_arch = "x86_64")]
-use core::arch::x86_64::{self as arch, __m256i, _mm_sfence};
+use core::arch::x86_64::{
+    self as arch, __m128, __m128d, __m128i, __m256, __m256d, __m256i, _mm_sfence,
+};
 
 /// Load from a 32-bit aligned address with non-temporal hint, avoiding filling the cache.
 #[inline]
@@ -17,12 +21,93 @@ pub fn _mm256_stream_load_si256(addr: &__m256i) -> __m256i {
 #[inline]
 #[target_feature(enable = "avx2")]
 pub fn _mm256_stream_store_256i(addr: &mut NonTemporalStoreable<'_, __m256i>, v: __m256i) {
-    unsafe { arch::_mm256_stream_si256(addr.inner, v) }
+    unsafe { arch::_mm256_stream_si256(addr.inner.as_ptr(), v) }
+}
+
+/// Store a 128-bit floating point vector of `[2 × double]` into a 128-bit aligned memory location.
+/// To minimize caching, the data is flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "sse2")]
+pub fn _mm_stream_pd(addr: &mut NonTemporalStoreable<'_, __m128d>, v: __m128d) {
+    unsafe { arch::_mm_stream_pd(addr.inner.as_ptr() as *mut f64, v) }
+}
+
+/// Store a 128-bit floating point vector of `[4 × f32]` into a 16-byte aligned memory location. To
+/// minimize caching, the data is flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "sse")]
+pub fn _mm_stream_ps(addr: &mut NonTemporalStoreable<'_, __m128>, v: __m128) {
+    unsafe { arch::_mm_stream_ps(addr.inner.as_ptr() as *mut f32, v) }
+}
+
+/// Store a 64-bit part `v.0` of a 128-bit vector into an aligned memory location. To minimize
+/// caching, the data is flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[cfg(any())]
+#[target_feature(enable = "sse4a")]
+pub fn _mm_stream_sd(addr: &mut NonTemporalStoreable<'_, f64>, v: __m128d) {
+    unsafe { arch::_mm_stream_sd(addr.inner.as_ptr(), v) }
+}
+
+/// Store a 32-bit value into a memory location. To minimize caching, the data is flagged as
+/// non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "sse2")]
+pub fn _mm_stream_si32(addr: &mut NonTemporalStoreable<'_, i32>, v: i32) {
+    unsafe { arch::_mm_stream_si32(addr.inner.as_ptr(), v) }
+}
+
+/// Store a 32-bit value into a memory location. To minimize caching, the data is flagged as
+/// non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "sse2")]
+pub fn _mm_stream_si128(addr: &mut NonTemporalStoreable<'_, __m128i>, v: __m128i) {
+    unsafe { arch::_mm_stream_si128(addr.inner.as_ptr(), v) }
+}
+
+/// Store a 32-bit part `v.0` of a 128-bit vector into a memory location. To minimize caching, the
+/// data is flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[cfg(any())]
+#[target_feature(enable = "sse4a")]
+pub fn _mm_stream_ss(addr: &mut NonTemporalStoreable<'_, f32>, v: __m128) {
+    unsafe { arch::_mm_stream_ss(addr.inner.as_ptr(), v) }
+}
+
+/// Store the four double precision floats of a 256-bit vector into a memory location. To minimize
+/// caching, the data is flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_stream_pd(addr: &mut NonTemporalStoreable<'_, __m256d>, v: __m256d) {
+    unsafe { arch::_mm256_stream_pd(addr.inner.as_ptr() as *mut f64, v) }
+}
+
+/// Store eight single precision float values of a 256-bit vector into a memory location. To
+/// minimize caching, the data is flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_stream_ps(addr: &mut NonTemporalStoreable<'_, __m256>, v: __m256) {
+    unsafe { arch::_mm256_stream_ps(addr.inner.as_ptr() as *mut f32, v) }
+}
+
+/// Store a 256-bit vector into an aligned memory location. To minimize caching, the data is
+/// flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_stream_si256(addr: &mut NonTemporalStoreable<'_, __m256i>, v: __m256i) {
+    unsafe { arch::_mm256_stream_si256(addr.inner.as_ptr(), v) }
 }
 
 /// A pointer to non-temporally written-to memory.
+///
+/// The lifetime on this struct means: we can write to the memory within lifetime `'data` while
+/// guaranteeing an appropriate fence afterwards, and then that effect appears as if we had written
+/// to the data through a mutable reference. The role of this type in this is the guarantee that
+/// *no* active reference, mutable or shared, to the memory can exist in the lifetime `'data' which
+/// could observe the memory while it is in the non-coherent state between having been written the
+/// points in time where it is written-to non-temporally and the fence being issue.
 pub struct NonTemporalStoreable<'data, T> {
-    inner: *mut T,
+    inner: ptr::NonNull<T>,
     marker: PhantomData<&'data mut T>,
 }
 
@@ -43,7 +128,7 @@ impl<'data> NonTemporalScope<'data> {
     /// (neither read or write) can occur that does not go through the x86 non-temporal intrinsics.
     pub fn prepare_write<T>(&self, inner: &'data mut T) -> NonTemporalStoreable<'data, T> {
         NonTemporalStoreable {
-            inner,
+            inner: ptr::NonNull::from(inner),
             marker: PhantomData,
         }
     }
@@ -54,14 +139,20 @@ impl<'data> NonTemporalScope<'data> {
     /// When memory is wrapped in such a manner, no other access is allowed until the scope exits.
     ///
     /// ```rust
-    #[cfg_attr(target_arch = "x86", doc = "
+    #[cfg_attr(
+        target_arch = "x86",
+        doc = "
         use safe_unaligned_simd::x86::{NonTemporalScope, _mm256_stream_store_256i};
         use core::arch::x86::{__m256i, _mm256_set1_epi8};
-    ")]
-    #[cfg_attr(target_arch = "x86_64", doc = "
+    "
+    )]
+    #[cfg_attr(
+        target_arch = "x86_64",
+        doc = "
         use safe_unaligned_simd::x86_64::{NonTemporalScope, _mm256_stream_store_256i};
         use core::arch::x86_64::{__m256i, _mm256_set1_epi8};
-    ")]
+    "
+    )]
     /// #[target_feature(enable = "avx2")]
     /// fn zero_data<'d>(scope: NonTemporalScope<'d>, data: &'d mut [__m256i]) {
     ///     let v = _mm256_set1_epi8(0);
@@ -96,5 +187,45 @@ impl<'data> NonTemporalScope<'data> {
 
         let _val = SFenceOnDrop;
         inner(NonTemporalScope { inner: PhantomData })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{_mm256_stream_store_256i, NonTemporalScope};
+
+    #[cfg(target_arch = "x86")]
+    use core::arch::x86::{__m256i, _mm256_set1_epi8};
+    #[cfg(target_arch = "x86_64")]
+    use core::arch::x86_64::{__m256i, _mm256_set1_epi8};
+
+    static CPU_HAS_AVX2: std::sync::LazyLock<bool> =
+        std::sync::LazyLock::new(|| is_x86_feature_detected!("avx2"));
+
+    #[test]
+    fn _mm256_stream_store() {
+        #[target_feature(enable = "avx2")]
+        fn zero_data<'d>(scope: NonTemporalScope<'d>, data: &'d mut [__m256i]) {
+            let v = _mm256_set1_epi8(0);
+
+            for part in data {
+                let mut storeable = scope.prepare_write(part);
+                _mm256_stream_store_256i(&mut storeable, v);
+            }
+        }
+
+        #[target_feature(enable = "avx2")]
+        fn test() {
+            let data: &mut [__m256i] = &mut [_mm256_set1_epi8(1); 4];
+            NonTemporalScope::with(|scope| {
+                zero_data(scope, data);
+            });
+            let a: [u16; 16] = unsafe { core::mem::transmute(data[0]) };
+            assert_eq!(a, [0; 16]);
+        }
+
+        assert!(*CPU_HAS_AVX2);
+
+        unsafe { test() }
     }
 }
