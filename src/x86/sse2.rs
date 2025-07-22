@@ -429,12 +429,12 @@ mod tests {
     }
 
     #[test]
-    fn test_mm_storel_epi64_cell() {
+    fn test_mm_storeu_si128_epi32_cell() {
         unsafe { test() }
 
         #[target_feature(enable = "sse2")]
         fn test() {
-            let mut a = [0, 1, 2, 3, 4];
+            let mut a = [0u32, 1, 2, 3, 4];
             let val = core::cell::Cell::from_mut(&mut a[..]).as_slice_of_cells();
 
             let load: &[_; 4] = val[..4].try_into().unwrap();
