@@ -19,7 +19,7 @@ pub fn _mm256_stream_load_si256(addr: &__m256i) -> __m256i {
 
 /// Store into a 32-bit aligned address with non-temporal hint, avoiding clobbering the cache.
 #[inline]
-#[target_feature(enable = "avx2")]
+#[target_feature(enable = "avx")]
 pub fn _mm256_stream_store_256i(addr: &mut NonTemporalStoreable<'_, __m256i>, v: __m256i) {
     unsafe { arch::_mm256_stream_si256(addr.inner.as_ptr(), v) }
 }
@@ -174,8 +174,12 @@ impl<'data> NonTemporalScope<'data> {
     /// # let a: [u16; 16] = unsafe { core::mem::transmute(data[0]) };
     /// # assert_eq!(a, [0; 16]);
     /// # }
-    /// # unsafe { _do_main() }
+    /// # 
+    /// # if cfg!(target_feature = "avx2") {
+    /// #     unsafe { _do_main() }
+    /// # }
     /// ```
+    #[target_feature(enable = "sse")]
     pub fn with<R>(inner: impl FnOnce(NonTemporalScope<'data>) -> R) -> R {
         struct SFenceOnDrop;
 
