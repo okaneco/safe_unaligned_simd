@@ -12,6 +12,7 @@ use core::arch::x86_64::{
 
 /// Load from a 32-bit aligned address with non-temporal hint, avoiding filling the cache.
 #[inline]
+#[cfg(any())]
 #[target_feature(enable = "avx2")]
 pub fn _mm256_stream_load_si256(addr: &__m256i) -> __m256i {
     unsafe { arch::_mm256_stream_load_si256(addr) }
@@ -146,7 +147,7 @@ impl<'data> NonTemporalScope<'data> {
     "
     )]
     ///
-    /// #[target_feature(enable = "avx2")]
+    /// #[target_feature(enable = "avx")]
     /// fn zero_data<'d>(scope: NonTemporalScope<'d>, data: &'d mut __m256i) {
     ///     let first = scope.prepare_write(data);
     ///     // Fails!
@@ -180,7 +181,7 @@ impl<'data> NonTemporalScope<'data> {
         use core::arch::x86_64::{__m256i, _mm256_set1_epi8};
     "
     )]
-    /// #[target_feature(enable = "avx2")]
+    /// #[target_feature(enable = "avx")]
     /// fn zero_data<'d>(scope: NonTemporalScope<'d>, data: &'d mut [__m256i]) {
     ///     let v = _mm256_set1_epi8(0);
     ///
@@ -190,7 +191,7 @@ impl<'data> NonTemporalScope<'data> {
     ///     }
     /// }
     ///
-    /// # #[target_feature(enable = "avx2")]
+    /// # #[target_feature(enable = "avx")]
     /// # fn _do_main() {
     /// let data: &mut [__m256i] = // ..
     /// # &mut [_mm256_set1_epi8(1); 4];
@@ -201,8 +202,8 @@ impl<'data> NonTemporalScope<'data> {
     /// # let a: [u16; 16] = unsafe { core::mem::transmute(data[0]) };
     /// # assert_eq!(a, [0; 16]);
     /// # }
-    /// # 
-    /// # if cfg!(target_feature = "avx2") {
+    /// #
+    /// # if cfg!(target_feature = "avx") {
     /// #     unsafe { _do_main() }
     /// # }
     /// ```
@@ -212,30 +213,42 @@ impl<'data> NonTemporalScope<'data> {
 
         impl Drop for SFenceOnDrop {
             fn drop(&mut self) {
+                // Safety: `SFenceOnDrop` only exists within `with` that has the target_feature
+                // `sse` enabled. It is only dropped within that method. So we can assume that
+                // target feature to exist and `_mm_sfence` to be available.
+                debug_assert!(cfg!(target_feature = "sse"));
+
                 unsafe { _mm_sfence() }
             }
         }
 
         let _val = SFenceOnDrop;
-        inner(NonTemporalScope { invariant: PhantomData })
+        inner(NonTemporalScope {
+            invariant: PhantomData,
+        })
     }
 }
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "_avx_test")]
     use super::{_mm256_stream_store_256i, NonTemporalScope};
 
     #[cfg(target_arch = "x86")]
+    #[cfg(feature = "_avx_test")]
     use core::arch::x86::{__m256i, _mm256_set1_epi8};
     #[cfg(target_arch = "x86_64")]
+    #[cfg(feature = "_avx_test")]
     use core::arch::x86_64::{__m256i, _mm256_set1_epi8};
 
-    static CPU_HAS_AVX2: std::sync::LazyLock<bool> =
-        std::sync::LazyLock::new(|| is_x86_feature_detected!("avx2"));
+    #[cfg(feature = "_avx_test")]
+    static CPU_HAS_AVX: std::sync::LazyLock<bool> =
+        std::sync::LazyLock::new(|| is_x86_feature_detected!("avx"));
 
     #[test]
+    #[cfg(feature = "_avx_test")]
     fn _mm256_stream_store() {
-        #[target_feature(enable = "avx2")]
+        #[target_feature(enable = "avx")]
         fn zero_data<'d>(scope: NonTemporalScope<'d>, data: &'d mut [__m256i]) {
             let v = _mm256_set1_epi8(0);
 
@@ -245,7 +258,7 @@ mod tests {
             }
         }
 
-        #[target_feature(enable = "avx2")]
+        #[target_feature(enable = "avx")]
         fn test() {
             let data: &mut [__m256i] = &mut [_mm256_set1_epi8(1); 4];
             NonTemporalScope::with(|scope| {
@@ -255,7 +268,7 @@ mod tests {
             assert_eq!(a, [0; 16]);
         }
 
-        assert!(*CPU_HAS_AVX2);
+        assert!(*CPU_HAS_AVX);
 
         unsafe { test() }
     }
