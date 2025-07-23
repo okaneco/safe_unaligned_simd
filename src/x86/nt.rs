@@ -115,7 +115,7 @@ pub struct NonTemporalStoreable<'data, T> {
 ///
 /// See [`Self::with`].
 pub struct NonTemporalScope<'lt> {
-    inner: PhantomData<&'lt mut ()>,
+    invariant: PhantomData<fn(&'lt mut ()) -> &'lt ()>,
 }
 
 impl<'data> NonTemporalScope<'data> {
@@ -126,6 +126,33 @@ impl<'data> NonTemporalScope<'data> {
     /// combination ensures that the observable behavior of stores follows the expected memory
     /// model of Rust. Since we have a unique reference to the memory at the start, no other access
     /// (neither read or write) can occur that does not go through the x86 non-temporal intrinsics.
+    ///
+    /// Note that the memory must be borrowed for the *whole* duration of the original scope.
+    /// Automatic reborrowing can not be used to shorten it for a different scope.
+    ///
+    /// ```rust,compile_fail
+    #[cfg_attr(
+        target_arch = "x86",
+        doc = "
+        use safe_unaligned_simd::x86::NonTemporalScope;
+        use core::arch::x86::__m256i;
+    "
+    )]
+    #[cfg_attr(
+        target_arch = "x86_64",
+        doc = "
+        use safe_unaligned_simd::x86_64::NonTemporalScope;
+        use core::arch::x86_64::__m256i;
+    "
+    )]
+    ///
+    /// #[target_feature(enable = "avx2")]
+    /// fn zero_data<'d>(scope: NonTemporalScope<'d>, data: &'d mut __m256i) {
+    ///     let first = scope.prepare_write(data);
+    ///     // Fails!
+    ///     let second = scope.prepare_write(data);
+    /// }
+    /// ```
     pub fn prepare_write<T>(&self, inner: &'data mut T) -> NonTemporalStoreable<'data, T> {
         NonTemporalStoreable {
             inner: ptr::NonNull::from(inner),
@@ -190,7 +217,7 @@ impl<'data> NonTemporalScope<'data> {
         }
 
         let _val = SFenceOnDrop;
-        inner(NonTemporalScope { inner: PhantomData })
+        inner(NonTemporalScope { invariant: PhantomData })
     }
 }
 
