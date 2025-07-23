@@ -18,13 +18,6 @@ pub fn _mm256_stream_load_si256(addr: &__m256i) -> __m256i {
     unsafe { arch::_mm256_stream_load_si256(addr) }
 }
 
-/// Store into a 32-bit aligned address with non-temporal hint, avoiding clobbering the cache.
-#[inline]
-#[target_feature(enable = "avx")]
-pub fn _mm256_stream_store_256i(addr: &mut NonTemporalStoreable<'_, __m256i>, v: __m256i) {
-    unsafe { arch::_mm256_stream_si256(addr.inner.as_ptr(), v) }
-}
-
 /// Store a 128-bit floating point vector of `[2 × double]` into a 128-bit aligned memory location.
 /// To minimize caching, the data is flagged as non-temporal (unlikely to be used again soon).
 #[inline]
@@ -170,14 +163,14 @@ impl<'data> NonTemporalScope<'data> {
     #[cfg_attr(
         target_arch = "x86",
         doc = "
-        use safe_unaligned_simd::x86::{NonTemporalScope, _mm256_stream_store_256i};
+        use safe_unaligned_simd::x86::{NonTemporalScope, _mm256_stream_si256};
         use core::arch::x86::{__m256i, _mm256_set1_epi8};
     "
     )]
     #[cfg_attr(
         target_arch = "x86_64",
         doc = "
-        use safe_unaligned_simd::x86_64::{NonTemporalScope, _mm256_stream_store_256i};
+        use safe_unaligned_simd::x86_64::{NonTemporalScope, _mm256_stream_si256};
         use core::arch::x86_64::{__m256i, _mm256_set1_epi8};
     "
     )]
@@ -187,7 +180,7 @@ impl<'data> NonTemporalScope<'data> {
     ///
     ///     for part in data {
     ///         let mut storeable = scope.prepare_write(part);
-    ///         _mm256_stream_store_256i(&mut storeable, v);
+    ///         _mm256_stream_si256(&mut storeable, v);
     ///     }
     /// }
     ///
@@ -232,7 +225,7 @@ impl<'data> NonTemporalScope<'data> {
 #[cfg(test)]
 mod tests {
     #[cfg(feature = "_avx_test")]
-    use super::{_mm256_stream_store_256i, NonTemporalScope};
+    use super::_mm256_stream_si256;
 
     #[cfg(target_arch = "x86")]
     #[cfg(feature = "_avx_test")]
@@ -254,7 +247,7 @@ mod tests {
 
             for part in data {
                 let mut storeable = scope.prepare_write(part);
-                _mm256_stream_store_256i(&mut storeable, v);
+                _mm256_stream_si256(&mut storeable, v);
             }
         }
 
