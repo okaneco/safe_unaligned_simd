@@ -1,0 +1,422 @@
+//! Non-temporal store operations.
+use core::{marker::PhantomData, ptr};
+
+#[cfg(target_arch = "x86")]
+use core::arch::x86::{
+    self as arch, __m128, __m128d, __m128i, __m256, __m256d, __m256i, _mm_sfence,
+};
+#[cfg(target_arch = "x86_64")]
+use core::arch::x86_64::{
+    self as arch, __m128, __m128d, __m128i, __m256, __m256d, __m256i, _mm_sfence,
+};
+
+/// Load from a 32-bit aligned address with non-temporal hint, avoiding filling the cache.
+#[inline]
+#[cfg(any())]
+#[target_feature(enable = "avx2")]
+pub fn _mm256_stream_load_si256(addr: &__m256i) -> __m256i {
+    unsafe { arch::_mm256_stream_load_si256(addr) }
+}
+
+/// Store a 128-bit floating point vector of `[2 × double]` into a 128-bit aligned memory location.
+/// To minimize caching, the data is flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "sse2")]
+pub fn _mm_stream_pd(addr: &mut NonTemporalStoreable<'_, __m128d>, v: __m128d) {
+    unsafe { arch::_mm_stream_pd(addr.inner.as_ptr().cast::<f64>(), v) }
+}
+
+/// Store a 128-bit floating point vector of `[4 × f32]` into a 16-byte aligned memory location. To
+/// minimize caching, the data is flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "sse")]
+pub fn _mm_stream_ps(addr: &mut NonTemporalStoreable<'_, __m128>, v: __m128) {
+    unsafe { arch::_mm_stream_ps(addr.inner.as_ptr().cast::<f32>(), v) }
+}
+
+/// Store a 64-bit part `v.0` of a 128-bit vector into an aligned memory location. To minimize
+/// caching, the data is flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[cfg(any())]
+#[target_feature(enable = "sse4a")]
+pub fn _mm_stream_sd(addr: &mut NonTemporalStoreable<'_, f64>, v: __m128d) {
+    unsafe { arch::_mm_stream_sd(addr.inner.as_ptr(), v) }
+}
+
+/// Store a 32-bit value into a memory location. To minimize caching, the data is flagged as
+/// non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "sse2")]
+pub fn _mm_stream_si32(addr: &mut NonTemporalStoreable<'_, i32>, v: i32) {
+    unsafe { arch::_mm_stream_si32(addr.inner.as_ptr(), v) }
+}
+
+/// Store a 64-bit value into a memory location. To minimize caching, the data is flagged as
+/// non-temporal (unlikely to be used again soon).
+#[inline]
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "sse2")]
+pub fn _mm_stream_si64(addr: &mut NonTemporalStoreable<'_, i64>, v: i64) {
+    unsafe { arch::_mm_stream_si64(addr.inner.as_ptr(), v) }
+}
+
+/// Store a 128-bit value into a 16-byte aligned memory location. To minimize caching, the data is
+/// flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "sse2")]
+pub fn _mm_stream_si128(addr: &mut NonTemporalStoreable<'_, __m128i>, v: __m128i) {
+    unsafe { arch::_mm_stream_si128(addr.inner.as_ptr(), v) }
+}
+
+/// Store a 32-bit part `v.0` of a 128-bit vector into a memory location. To minimize caching, the
+/// data is flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[cfg(any())]
+#[target_feature(enable = "sse4a")]
+pub fn _mm_stream_ss(addr: &mut NonTemporalStoreable<'_, f32>, v: __m128) {
+    unsafe { arch::_mm_stream_ss(addr.inner.as_ptr(), v) }
+}
+
+/// Store the four double precision floats of a 256-bit vector into a 32-byte aligned memory
+/// location. To minimize caching, the data is flagged as non-temporal (unlikely to be used again
+/// soon).
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_stream_pd(addr: &mut NonTemporalStoreable<'_, __m256d>, v: __m256d) {
+    const _: () = assert!(core::mem::size_of::<__m256d>() == 32);
+    // Safety: we deviate from the intrinsic's signature which using a *mut f64 due to the
+    // alignment requirement that is captured by `__m256d` but not `[f64; 4]`.
+    unsafe { arch::_mm256_stream_pd(addr.inner.as_ptr().cast::<f64>(), v) }
+}
+
+/// Store eight single precision float values of a 256-bit vector into a 32-byte aligned memory
+/// location. To minimize caching, the data is flagged as non-temporal (unlikely to be used again
+/// soon).
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_stream_ps(addr: &mut NonTemporalStoreable<'_, __m256>, v: __m256) {
+    const _: () = assert!(core::mem::size_of::<__m256>() == 32);
+    // Safety: we deviate from the intrinsic's signature which using a *mut f32 due to the
+    // alignment requirement that is captured by `__m256d` but not `[f32; 8]`.
+    unsafe { arch::_mm256_stream_ps(addr.inner.as_ptr().cast::<f32>(), v) }
+}
+
+/// Store a 256-bit vector into an aligned memory location. To minimize caching, the data is
+/// flagged as non-temporal (unlikely to be used again soon).
+#[inline]
+#[target_feature(enable = "avx")]
+pub fn _mm256_stream_si256(addr: &mut NonTemporalStoreable<'_, __m256i>, v: __m256i) {
+    unsafe { arch::_mm256_stream_si256(addr.inner.as_ptr(), v) }
+}
+
+/// A pointer to non-temporally written-to memory.
+///
+/// The lifetime on this struct means: we can write to the memory within lifetime `'data` while
+/// guaranteeing an appropriate fence afterwards, and then that effect appears as if we had written
+/// to the data through a mutable reference. The role of this type in this is the guarantee that
+/// *no* active reference, mutable or shared, to the memory can exist in the lifetime `'data' which
+/// could observe the memory while it is in the non-coherent state between having been written the
+/// points in time where it is written-to non-temporally and the fence being issue.
+pub struct NonTemporalStoreable<'data, T> {
+    inner: ptr::NonNull<T>,
+    marker: PhantomData<&'data mut T>,
+}
+
+/// A marker for a scope that allows non-temporal writes.
+///
+/// See [`Self::with`].
+pub struct NonTemporalScope<'lt> {
+    invariant: PhantomData<fn(&'lt mut ()) -> &'lt ()>,
+}
+
+impl<'data> NonTemporalScope<'data> {
+    /// Wrap writable memory such that non-temporal stores can be issued to it.
+    ///
+    /// The scope value certifies an [`sfence`] instruction is executed after the scope ends and
+    /// before any other access to the mutably referenced memory is possible again. This
+    /// combination ensures that the observable behavior of stores follows the expected memory
+    /// model of Rust. Since we have a unique reference to the memory at the start, no other access
+    /// (neither read or write) can occur that does not go through the x86 non-temporal intrinsics.
+    ///
+    #[cfg_attr(target_arch = "x86", doc = "[`sfence`]: `core::arch::x86::_mm_sfence`")]
+    #[cfg_attr(
+        target_arch = "x86_64",
+        doc = "[`sfence`]: `core::arch::x86_64::_mm_sfence`"
+    )]
+    ///
+    /// Note that the memory must be borrowed for the *whole* duration of the original scope.
+    /// Automatic reborrowing can not be used to shorten it for a different scope.
+    ///
+    /// ```rust,compile_fail
+    #[cfg_attr(
+        target_arch = "x86",
+        doc = "\
+            use safe_unaligned_simd::x86::NonTemporalScope;\n\
+            use core::arch::x86::__m256i;\n\
+        "
+    )]
+    #[cfg_attr(
+        target_arch = "x86_64",
+        doc = "\
+            use safe_unaligned_simd::x86_64::NonTemporalScope;\n\
+            use core::arch::x86_64::__m256i;\n\
+        "
+    )]
+    ///
+    /// #[target_feature(enable = "avx")]
+    /// fn zero_data<'d>(scope: NonTemporalScope<'d>, data: &'d mut __m256i) {
+    ///     let first = scope.prepare_write(data);
+    ///     // Fails!
+    ///     let second = scope.prepare_write(data);
+    /// }
+    /// ```
+    pub fn prepare_write<T>(&self, inner: &'data mut T) -> NonTemporalStoreable<'data, T> {
+        NonTemporalStoreable {
+            inner: ptr::NonNull::from(inner),
+            marker: PhantomData,
+        }
+    }
+
+    /// Run a closure with the guarantee of exiting with an `sfence` instruction. A closure is
+    /// invoked within the scope and given a value in reference to the scope. That value allows
+    /// qualifying mutably owned memory as memory which can be targeted with non-temporal stores.
+    /// When memory is wrapped in such a manner, no other access is allowed until the scope exits.
+    ///
+    /// ```
+    #[cfg_attr(
+        target_arch = "x86",
+        doc = "\
+            use safe_unaligned_simd::x86::{NonTemporalScope, _mm256_stream_si256};\n\
+            use core::arch::x86::{__m256i, _mm256_set1_epi8};\n\
+        "
+    )]
+    #[cfg_attr(
+        target_arch = "x86_64",
+        doc = "\
+            use safe_unaligned_simd::x86_64::{NonTemporalScope, _mm256_stream_si256};\n\
+            use core::arch::x86_64::{__m256i, _mm256_set1_epi8};\n\
+        "
+    )]
+    /// #[target_feature(enable = "avx")]
+    /// fn zero_data<'d>(scope: NonTemporalScope<'d>, data: &'d mut [__m256i]) {
+    ///     let v = _mm256_set1_epi8(0);
+    ///
+    ///     for part in data {
+    ///         let mut storeable = scope.prepare_write(part);
+    ///         _mm256_stream_si256(&mut storeable, v);
+    ///     }
+    /// }
+    ///
+    /// # #[target_feature(enable = "avx")]
+    /// # fn _do_main() {
+    /// let data: &mut [__m256i] = // ..
+    /// # &mut [_mm256_set1_epi8(1); 4];
+    ///
+    /// NonTemporalScope::with(|scope| {
+    ///     zero_data(scope, data);
+    /// });
+    /// # let a: [u16; 16] = unsafe { core::mem::transmute(data[0]) };
+    /// # assert_eq!(a, [0; 16]);
+    /// # }
+    /// #
+    /// # // Miri does not support non-temporal instructions, avx needed for the example
+    /// # if cfg!(all(target_feature = "avx", not(miri))) {
+    /// #     unsafe { _do_main() }
+    /// # }
+    /// ```
+    #[target_feature(enable = "sse")]
+    pub fn with<R>(inner: impl FnOnce(NonTemporalScope<'data>) -> R) -> R {
+        struct SFenceOnDrop;
+
+        impl Drop for SFenceOnDrop {
+            fn drop(&mut self) {
+                // Safety: `SFenceOnDrop` only exists within `with` that has the target_feature
+                // `sse` enabled. It is only dropped within that method. So we can assume that
+                // target feature to exist and `_mm_sfence` to be available.
+                debug_assert!(cfg!(target_feature = "sse"));
+
+                unsafe { _mm_sfence() }
+            }
+        }
+
+        let _val = SFenceOnDrop;
+        inner(NonTemporalScope {
+            invariant: PhantomData,
+        })
+    }
+}
+
+#[cfg(all(test, not(miri)))]
+mod tests {
+    #[cfg(feature = "_avx_test")]
+    use super::_mm256_stream_si256;
+
+    use super::NonTemporalScope;
+
+    #[cfg(target_arch = "x86")]
+    use core::arch::x86::{self as arch, __m128, __m128d, __m128i};
+    #[cfg(target_arch = "x86_64")]
+    use core::arch::x86_64::{self as arch, __m128, __m128d, __m128i};
+
+    #[cfg(target_arch = "x86")]
+    #[cfg(feature = "_avx_test")]
+    use core::arch::x86::{__m256i, _mm256_set1_epi8};
+    #[cfg(target_arch = "x86_64")]
+    #[cfg(feature = "_avx_test")]
+    use core::arch::x86_64::{__m256i, _mm256_set1_epi8};
+
+    #[cfg(feature = "_avx_test")]
+    static CPU_HAS_AVX: std::sync::LazyLock<bool> =
+        std::sync::LazyLock::new(|| is_x86_feature_detected!("avx"));
+
+    fn assert_eq_m128d(a: __m128d, b: __m128d) {
+        let a: [u8; 16] = unsafe { core::mem::transmute(a) };
+        let b: [u8; 16] = unsafe { core::mem::transmute(b) };
+        assert_eq!(a, b)
+    }
+
+    fn assert_eq_m128(a: __m128, b: __m128) {
+        let a: [u8; 16] = unsafe { core::mem::transmute(a) };
+        let b: [u8; 16] = unsafe { core::mem::transmute(b) };
+        assert_eq!(a, b)
+    }
+
+    fn assert_eq_m128i(a: __m128i, b: __m128i) {
+        let a: [u8; 16] = unsafe { core::mem::transmute(a) };
+        let b: [u8; 16] = unsafe { core::mem::transmute(b) };
+        assert_eq!(a, b)
+    }
+
+    #[cfg(feature = "_avx_test")]
+    fn assert_eq_m256i(a: __m256i, b: __m256i) {
+        let a: [u8; 32] = unsafe { core::mem::transmute(a) };
+        let b: [u8; 32] = unsafe { core::mem::transmute(b) };
+        assert_eq!(a, b)
+    }
+
+    #[test]
+    #[cfg(feature = "_avx_test")]
+    fn _mm256_stream_store() {
+        #[target_feature(enable = "avx")]
+        fn zero_data<'d>(scope: NonTemporalScope<'d>, data: &'d mut [__m256i]) {
+            let v = _mm256_set1_epi8(0);
+
+            for part in data {
+                let mut storeable = scope.prepare_write(part);
+                _mm256_stream_si256(&mut storeable, v);
+            }
+        }
+
+        #[target_feature(enable = "avx")]
+        fn test() {
+            let data: &mut [__m256i] = &mut [_mm256_set1_epi8(1); 4];
+
+            NonTemporalScope::with(|scope| {
+                zero_data(scope, data);
+            });
+
+            assert_eq_m256i(data[0], _mm256_set1_epi8(0));
+        }
+
+        assert!(*CPU_HAS_AVX);
+
+        unsafe { test() }
+    }
+
+    #[test]
+    fn test_mm_stream_pd() {
+        #[target_feature(enable = "sse2")]
+        fn stream<'scope>(scope: NonTemporalScope<'scope>, data: &'scope mut __m128d) {
+            let mut data = scope.prepare_write(data);
+            super::_mm_stream_pd(&mut data, arch::_mm_set_pd(3.0, 4.0));
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test() {
+            let mut data = arch::_mm_set_pd(1.0, 2.0);
+            NonTemporalScope::with(|scope| stream(scope, &mut data));
+            assert_eq_m128d(data, arch::_mm_set_pd(3.0, 4.0));
+        }
+
+        unsafe { test() }
+    }
+
+    #[test]
+    fn test_mm_stream_ps() {
+        #[target_feature(enable = "sse")]
+        fn stream<'scope>(scope: NonTemporalScope<'scope>, data: &'scope mut __m128) {
+            let mut data = scope.prepare_write(data);
+            super::_mm_stream_ps(&mut data, arch::_mm_set_ps(1.0, 2.0, 3.0, 4.0));
+        }
+
+        #[target_feature(enable = "sse")]
+        fn test() {
+            let mut data = arch::_mm_set_ps(0.0, 0.0, 0.0, 0.0);
+            NonTemporalScope::with(|scope| stream(scope, &mut data));
+            assert_eq_m128(data, arch::_mm_set_ps(1.0, 2.0, 3.0, 4.0));
+        }
+
+        unsafe { test() }
+    }
+
+    #[test]
+    fn test_mm_stream_si32() {
+        #[target_feature(enable = "sse2")]
+        fn stream<'scope>(scope: NonTemporalScope<'scope>, data: &'scope mut [i32]) {
+            for (idx, data) in data.iter_mut().enumerate() {
+                let mut data = scope.prepare_write(data);
+                super::_mm_stream_si32(&mut data, idx as i32);
+            }
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test() {
+            let mut data = [0; 4];
+            NonTemporalScope::with(|scope| stream(scope, &mut data));
+            assert_eq!(data, [0, 1, 2, 3]);
+        }
+
+        unsafe { test() }
+    }
+
+    #[test]
+    #[cfg(target_arch = "x86_64")]
+    fn test_mm_stream_si64() {
+        #[target_feature(enable = "sse2")]
+        fn stream<'scope>(scope: NonTemporalScope<'scope>, data: &'scope mut [i64]) {
+            for (idx, data) in data.iter_mut().enumerate() {
+                let mut data = scope.prepare_write(data);
+                super::_mm_stream_si64(&mut data, idx as i64);
+            }
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test() {
+            let mut data = [0; 4];
+            NonTemporalScope::with(|scope| stream(scope, &mut data));
+            assert_eq!(data, [0, 1, 2, 3]);
+        }
+
+        unsafe { test() }
+    }
+
+    #[test]
+    fn test_mm_stream_si128() {
+        #[target_feature(enable = "sse2")]
+        fn stream<'scope>(scope: NonTemporalScope<'scope>, data: &'scope mut [__m128i]) {
+            for (idx, data) in data.iter_mut().enumerate() {
+                let mut data = scope.prepare_write(data);
+                super::_mm_stream_si128(&mut data, arch::_mm_set1_epi8(idx as i8));
+            }
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test() {
+            let mut data = [arch::_mm_setzero_si128(); 4];
+            NonTemporalScope::with(|scope| stream(scope, &mut data));
+            assert_eq_m128i(data[3], arch::_mm_set1_epi8(3));
+        }
+
+        unsafe { test() }
+    }
+}

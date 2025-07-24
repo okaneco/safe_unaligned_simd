@@ -18,6 +18,9 @@ pub use self::sse2::*;
 mod avx;
 pub use self::avx::*;
 
+mod nt;
+pub use self::nt::*;
+
 // Internal module for sealing SIMD traits.
 mod private {
     pub trait Sealed {}
