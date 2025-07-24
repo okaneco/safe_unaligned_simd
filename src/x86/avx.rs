@@ -291,7 +291,6 @@ mod tests {
         assert_eq!(a, b)
     }
 
-    //
     #[test]
     fn test_mm256_broadcast_pd() {
         assert!(*CPU_HAS_AVX);

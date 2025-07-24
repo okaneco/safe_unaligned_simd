@@ -20,6 +20,8 @@ categories = ["hardware-support", "api-bindings", "no-std"]
 
 [features]
 default = []
+# Gain access to unstable features which require the nightly compiler
+nightly = []
 
 # Internal feature for target-feature testing
 _avx_test = []
