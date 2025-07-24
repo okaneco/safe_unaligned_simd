@@ -51,7 +51,7 @@ pub fn _mm_stream_si32(addr: &mut NonTemporalStoreable<'_, i32>, v: i32) {
     unsafe { arch::_mm_stream_si32(addr.inner.as_ptr(), v) }
 }
 
-/// Store a 32-bit value into a memory location. To minimize caching, the data is flagged as
+/// Store a 64-bit value into a memory location. To minimize caching, the data is flagged as
 /// non-temporal (unlikely to be used again soon).
 #[inline]
 #[cfg(target_arch = "x86_64")]
@@ -60,8 +60,8 @@ pub fn _mm_stream_si64(addr: &mut NonTemporalStoreable<'_, i64>, v: i64) {
     unsafe { arch::_mm_stream_si64(addr.inner.as_ptr(), v) }
 }
 
-/// Store a 32-bit value into a memory location. To minimize caching, the data is flagged as
-/// non-temporal (unlikely to be used again soon).
+/// Store a 128-bit value into a 16-byte aligned memory location. To minimize caching, the data is
+/// flagged as non-temporal (unlikely to be used again soon).
 #[inline]
 #[target_feature(enable = "sse2")]
 pub fn _mm_stream_si128(addr: &mut NonTemporalStoreable<'_, __m128i>, v: __m128i) {
@@ -77,19 +77,27 @@ pub fn _mm_stream_ss(addr: &mut NonTemporalStoreable<'_, f32>, v: __m128) {
     unsafe { arch::_mm_stream_ss(addr.inner.as_ptr(), v) }
 }
 
-/// Store the four double precision floats of a 256-bit vector into a memory location. To minimize
-/// caching, the data is flagged as non-temporal (unlikely to be used again soon).
+/// Store the four double precision floats of a 256-bit vector into a 32-byte aligned memory
+/// location. To minimize caching, the data is flagged as non-temporal (unlikely to be used again
+/// soon).
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_stream_pd(addr: &mut NonTemporalStoreable<'_, __m256d>, v: __m256d) {
+    const _: () = assert!(core::mem::size_of::<__m256d>() == 32);
+    // Safety: we deviate from the intrinsic's signature which using a *mut f64 due to the
+    // alignment requirement that is captured by `__m256d` but not `[f64; 4]`.
     unsafe { arch::_mm256_stream_pd(addr.inner.as_ptr().cast::<f64>(), v) }
 }
 
-/// Store eight single precision float values of a 256-bit vector into a memory location. To
-/// minimize caching, the data is flagged as non-temporal (unlikely to be used again soon).
+/// Store eight single precision float values of a 256-bit vector into a 32-byte aligned memory
+/// location. To minimize caching, the data is flagged as non-temporal (unlikely to be used again
+/// soon).
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_stream_ps(addr: &mut NonTemporalStoreable<'_, __m256>, v: __m256) {
+    const _: () = assert!(core::mem::size_of::<__m256>() == 32);
+    // Safety: we deviate from the intrinsic's signature which using a *mut f32 due to the
+    // alignment requirement that is captured by `__m256d` but not `[f32; 8]`.
     unsafe { arch::_mm256_stream_ps(addr.inner.as_ptr().cast::<f32>(), v) }
 }
 
@@ -212,7 +220,7 @@ impl<'data> NonTemporalScope<'data> {
     /// # }
     /// #
     /// # // Miri does not support non-temporal instructions, avx needed for the example
-    /// # if cfg!(all(target_feature = "avx", miri)) {
+    /// # if cfg!(all(target_feature = "avx", not(miri))) {
     /// #     unsafe { _do_main() }
     /// # }
     /// ```
