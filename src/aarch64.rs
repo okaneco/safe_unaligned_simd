@@ -1,0 +1,221 @@
+//! Platform-specific intrinsics for the aarch64 platform.
+//!
+//! Note that instructions are encoded with an optional <align> field which none of the intrinsics
+//! here set themselves. (It could hint alignment 64/128/256). The field is then 0b00 which is
+//!
+//! > Whenever <align> is omitted, the standard alignment is used, see Unaligned data access,
+//!
+//! You *could* use all these intrinsics with completely unaligned memory if you set SCTLR, the
+//! system control register, which is not part of the guarantees. So we do not allow those. To load
+//! unaligned floating point data, use an appropriate u8xN type and reinterpret the vector.
+#![cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
+
+// Use all variants of registers.
+use core::arch::aarch64::{self as arch, *};
+
+// Most of this is generated via macro due to the respective nature. The macro identifies to which
+// kind of internal we want to expand by an introductory keyword (load, store) followed by a
+// sequence of wrapper instantiations. To review this, the basic structure is:
+//
+//   fn vld1_u16_x2(_: &[u16; 4][..2] as [[u16; 4]; 2]) -> uint16x4x2_t;
+//
+// Here `vld1_u16_x2` identifies the intrinsic. The first type-like syntax is the input type as it
+// should be thought of in the context of the vector, the `..2` is the number of vectors involved.
+// The second type `[[u16; 4]; 2]` is the actual argument type that the wrapper will have. Then
+// finally the return type is used as is.
+//
+// Each block also expects a `size` macro to perform some compile-time verification of the typing.
+// Mostly we verify that types have exactly the register size and thus fit the expected memory
+// access. This is only enabled on test/check builds.
+macro_rules! vld_n_replicate_k {
+    (
+        // So we have one unsafe keyword in the pre-expansion.
+        unsafe: $kind:ident;
+        size: $size:ident;
+
+        $(
+            $(#[$meta:meta])* fn $intrinsic:ident(_: &[$base_ty:ty; $n:literal][..$len:literal] as $realty:ty) -> $ret:ty;
+        )*
+    ) => {
+        $(
+            vld_n_replicate_k!(
+                @ $kind $(#[$meta])* $intrinsic: ([$base_ty; $n][..$len] | $realty) -> $ret [$size]
+            );
+        )*
+    };
+
+    // This macro generates one signature. The basic inputs are:
+    //
+    // - `base_ty` the register type that underlies each load
+    // - `n` the number of elements in one structure
+    // - `len` the number of structures being loaded
+    // - `ret` the register type to which we may broadcast
+    (@ load // Internal expansion for load-like intrinsics.
+        $(#[$meta:meta])*
+        $intrinsic:ident: ([$base_ty:ty; $n:literal][..$registers:literal] | $realty:ty) -> $ret:ty
+        $([$size:ident])?
+    ) => {
+        $(#[$meta])*
+        #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
+        #[target_feature(enable = "neon")]
+        pub fn $intrinsic(from: &$realty) -> $ret {
+            $(
+                $size!($registers registers [[$base_ty; $n]; $registers] as $realty);
+            )?
+
+            unsafe { arch::$intrinsic(::core::ptr::from_ref(from).cast()) }
+        }
+    };
+}
+
+macro_rules! assert_size_8bytes {
+    ($n:literal registers $ty:ty as $real:ty) => {
+        // Ensure that the type is 128 bits wide.
+        const _: () = ::core::assert!(::core::mem::size_of::<$ty>() == 8 * $n);
+        const _: () = ::core::assert!(::core::mem::size_of::<$real>() == 8 * $n);
+    };
+}
+
+macro_rules! assert_size_16bytes {
+    ($n:literal registers $ty:ty as $real:ty) => {
+        // Ensure that the type is 128 bits wide.
+        const _: () = ::core::assert!(::core::mem::size_of::<$ty>() == 16 * $n);
+        const _: () = ::core::assert!(::core::mem::size_of::<$real>() == 16 * $n);
+    };
+}
+
+#[cfg(test)]
+macro_rules! various_sizes {
+    ($n:literal registers $ty:ty as $real:ty) => {
+        // Only make sure that our annotated structure and the interface type match up
+        const _: () = ::core::assert!(core::mem::size_of::<$ty>() == core::mem::size_of::<$real>());
+    };
+}
+
+#[cfg(not(test))]
+macro_rules! various_sizes {
+    // No reason to take up compile time for a constant assert.
+    ($n:literal registers $ty:ty as $real:ty) => {};
+}
+
+// There are four fundamental types of loads:
+// - `vldN[q]_<ty>` which loads an array of structures of N elements of type <ty>, as many as
+//   fill the 8-byte or with q 16-byte registers. Eg. vld2q_f32 would load 8 total values, each
+//   of the two result vectors getting 4 elements for a total of 16-bytes each. (These loads
+//   would be interleaved but that's not important for the memory access part).
+//
+// - `vld1[q]_<ty>_xK` which is performs multiple loads of the type `vld1[q]_<ty>` to
+//   K consective registers but in a single instruction, compared to stacking multiple loads.
+//
+// - vldN[q]_dup_<ty> which loads *one* structure of N elements and fills each of the N
+//   registers with the contents of its one element.
+//
+//- `vldN[q]_lane_<t> which loads *one* structure of N elements and inserts the contents of
+//   each registers elements into a specific lane, i.e. the lane must be within the bounds such
+//   that `[ty; LANE]` does not exceed 8 or 16-bytes with/without q respectively.
+vld_n_replicate_k! {
+    unsafe: load;
+    // Loads full registers, so 8 bytes per register
+    size: assert_size_8bytes;
+
+    /// load an array of 8 `u8` values to one 8-byte register.
+    fn vld1_u8(_: &[u8; 8][..1] as [u8; 8]) -> uint8x8_t;
+    /// load an array of 8 `i8` values to one 8-byte register.
+    fn vld1_s8(_: &[i8; 8][..1] as [i8; 8]) -> int8x8_t;
+    /// load an array of 4 `i16` values to one 8-byte register.
+    fn vld1_u16(_: &[u16; 4][..1] as [u16; 4]) -> uint16x4_t;
+    /// load an array of 4 `u16` values to one 8-byte register.
+    fn vld1_s16(_: &[i16; 4][..1] as [i16; 4]) -> int16x4_t;
+    /// load an array of 2 `u32` values to one 8-byte register.
+    fn vld1_u32(_: &[u32; 2][..1] as [u32; 2]) -> uint32x2_t;
+    /// load an array of 2 `i32` values to one 8-byte register.
+    fn vld1_s32(_: &[i32; 2][..1] as [i32; 2]) -> int32x2_t;
+    /// load an array of 2 `f32` values to one 8-byte register.
+    fn vld1_f32(_: &[f32; 2][..1] as [f32; 2]) -> float32x2_t;
+    /// load one `u64` value to one 8-byte register.
+    fn vld1_u64(_: &[u64; 1][..1] as u64) -> uint64x1_t;
+    /// load one `i64` value to one 8-byte register.
+    fn vld1_s64(_: &[i64; 1][..1] as i64) -> int64x1_t;
+    /// load one `f64` value to one 8-byte register.
+    fn vld1_f64(_: &[f64; 1][..1] as f64) -> float64x1_t;
+
+    /// load arrays of 8 `u8` values to two 8-byte register.
+    fn vld1_u8_x2(_: &[u8; 8][..2] as [[u8; 8]; 2]) -> uint8x8x2_t;
+    /// load arrays of 8 `i8` values to two 8-byte register.
+    fn vld1_s8_x2(_: &[i8; 8][..2] as [[i8; 8]; 2]) -> int8x8x2_t;
+    /// load arrays of 4 `i16` values to two 8-byte register.
+    fn vld1_u16_x2(_: &[u16; 4][..2] as [[u16; 4]; 2]) -> uint16x4x2_t;
+    /// load arrays of 4 `u16` values to two 8-byte register.
+    fn vld1_s16_x2(_: &[i16; 4][..2] as [[i16; 4]; 2]) -> int16x4x2_t;
+    /// load arrays of 2 `u32` values to two 8-byte register.
+    fn vld1_u32_x2(_: &[u32; 2][..2] as [[u32; 2]; 2]) -> uint32x2x2_t;
+    /// load arrays of 2 `i32` values to two 8-byte register.
+    fn vld1_s32_x2(_: &[i32; 2][..2] as [[i32; 2]; 2]) -> int32x2x2_t;
+    /// load arrays of 2 `f32` values to two 8-byte register.
+    fn vld1_f32_x2(_: &[f32; 2][..2] as [[f32; 2]; 2]) -> float32x2x2_t;
+    /// load two `u64` values to two 8-byte register.
+    fn vld1_u64_x2(_: &[u64; 1][..2] as [u64; 2]) -> uint64x1x2_t;
+    /// load two `i64` values to two 8-byte register.
+    fn vld1_s64_x2(_: &[i64; 1][..2] as [i64; 2]) -> int64x1x2_t;
+    /// load two `f64` values to two 8-byte register.
+    fn vld1_f64_x2(_: &[f64; 1][..2] as [f64; 2]) -> float64x1x2_t;
+}
+
+vld_n_replicate_k! {
+    unsafe: load;
+    // Loads full registers, so 16 bytes per register
+    size: assert_size_16bytes;
+
+    /// load an array of 16 `u8` values to one 16-byte register.
+    fn vld1q_u8(_: &[u8; 16][..1] as [u8; 16]) -> uint8x16_t;
+    /// load an array of 16 `i8` values to one 16-byte register.
+    fn vld1q_s8(_: &[i8; 16][..1] as [i8; 16]) -> int8x16_t;
+    /// load an array of 8 `i16` values to one 16-byte register.
+    fn vld1q_u16(_: &[u16; 8][..1] as [u16; 8]) -> uint16x8_t;
+    /// load an array of 8 `u16` values to one 16-byte register.
+    fn vld1q_s16(_: &[i16; 8][..1] as [i16; 8]) -> int16x8_t;
+    /// load an array of 4 `u32` values to one 16-byte register.
+    fn vld1q_u32(_: &[u32; 4][..1] as [u32; 4]) -> uint32x4_t;
+    /// load an array of 4 `i32` values to one 16-byte register.
+    fn vld1q_s32(_: &[i32; 4][..1] as [i32; 4]) -> int32x4_t;
+    /// load an array of 4 `f32` values to one 16-byte register.
+    fn vld1q_f32(_: &[f32; 4][..1] as [f32; 4]) -> float32x4_t;
+    /// load an array of 2 `u64` value to one 16-byte register.
+    fn vld1q_u64(_: &[u64; 2][..1] as [u64; 2]) -> uint64x2_t;
+    /// load an array of 2 `i64` value to one 16-byte register.
+    fn vld1q_s64(_: &[i64; 2][..1] as [i64; 2]) -> int64x2_t;
+    /// load an array of 2 `f64` value to one 16-byte register.
+    fn vld1q_f64(_: &[f64; 2][..1] as [f64; 2]) -> float64x2_t;
+}
+
+vld_n_replicate_k! {
+    unsafe: load;
+    size: various_sizes;
+
+    /// Load one single-element `f32` and replicate to all lanes.
+    fn vld1_dup_f32(_: &[f32; 1][..1] as f32) -> float32x2_t;
+    /// Load an array of two `f32` elements and replicate to lanes of two registers.
+    fn vld2_dup_f32(_: &[f32; 2][..1] as [f32; 2]) -> float32x2x2_t;
+    /// Load an array of three `f32` elements and replicate to lanes of three registers.
+    fn vld3_dup_f32(_: &[f32; 3][..1] as [f32; 3]) -> float32x2x3_t;
+    /// Load an array of four `f32` elements and replicate to lanes of four registers.
+    fn vld4_dup_f32(_: &[f32; 4][..1] as [f32; 4]) -> float32x2x4_t;
+
+    /// Load one single-element `f64` and replicate to all lanes.
+    fn vld1_dup_f64(_: &[f64; 1][..1] as f64) -> float64x1_t;
+    /// Load an array of two `f64` elements and replicate to lanes of two registers.
+    fn vld2_dup_f64(_: &[f64; 2][..1] as [f64; 2]) -> float64x1x2_t;
+    /// Load an array of three `f64` elements and replicate to lanes of three registers.
+    fn vld3_dup_f64(_: &[f64; 3][..1] as [f64; 3]) -> float64x1x3_t;
+    /// Load an array of four `f64` elements and replicate to lanes of four registers.
+    fn vld4_dup_f64(_: &[f64; 4][..1] as [f64; 4]) -> float64x1x4_t;
+
+    /// Load one single-element `f32` and replicate to all lanes.
+    fn vld1q_dup_f32(_: &[f32; 1][..1] as f32) -> float32x4_t;
+    /// Load an array of two `f32` elements and replicate to lanes of two registers.
+    fn vld2q_dup_f32(_: &[f32; 2][..1] as [f32; 2]) -> float32x4x2_t;
+    /// Load an array of three `f32` elements and replicate to lanes of three registers.
+    fn vld3q_dup_f32(_: &[f32; 3][..1] as [f32; 3]) -> float32x4x3_t;
+    /// Load an array of four `f32` elements and replicate to lanes of four registers.
+    fn vld4q_dup_f32(_: &[f32; 4][..1] as [f32; 4]) -> float32x4x4_t;
+}
