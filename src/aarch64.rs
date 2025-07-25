@@ -318,7 +318,7 @@ vld_n_replicate_k! {
 
 vld_n_replicate_k! {
     unsafe: store;
-    // Loads full registers, so 8 bytes per register
+    // Stores full registers, so 8 bytes per register
     size: assert_size_8bytes;
 
     /// Store an array of 8 `u8` values from one 8-byte register.
@@ -408,7 +408,7 @@ vld_n_replicate_k! {
 
 vld_n_replicate_k! {
     unsafe: store;
-    // Loads full registers, so 16 bytes per register
+    // Stores full registers, so 16 bytes per register
     size: assert_size_16bytes;
 
     /// Store an array of 16 `u8` values to one 16-byte register.
