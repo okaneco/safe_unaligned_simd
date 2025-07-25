@@ -65,7 +65,28 @@ macro_rules! vld_n_replicate_k {
                 $size!($registers registers [[$base_ty; $n]; $registers] as $realty);
             )?
 
+            // Safety: Review the macro use and macro construction. We match up types to the
+            // intrinsics being used. Sizes are compile-time checked in test builds.
             unsafe { arch::$intrinsic(::core::ptr::from_ref(from).cast()) }
+        }
+    };
+
+    (@ store // Internal expansion for store-like intrinsics.
+        $(#[$meta:meta])*
+        $intrinsic:ident: ([$base_ty:ty; $n:literal][..$registers:literal] | $realty:ty) -> $ret:ty
+        $([$size:ident])?
+    ) => {
+        $(#[$meta])*
+        #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
+        #[target_feature(enable = "neon")]
+        pub fn $intrinsic(into: &mut $realty, from: $ret) {
+            $(
+                $size!($registers registers [[$base_ty; $n]; $registers] as $realty);
+            )?
+
+            // Safety: Review the macro use and macro construction. We match up types to the
+            // intrinsics being used. Sizes are compile-time checked in test builds.
+            unsafe { arch::$intrinsic(::core::ptr::from_mut(into).cast(), from) }
         }
     };
 }
@@ -233,6 +254,33 @@ vld_n_replicate_k! {
 }
 
 vld_n_replicate_k! {
+    unsafe: store;
+    // Loads full registers, so 16 bytes per register
+    size: assert_size_16bytes;
+
+    /// store an array of 16 `u8` values to one 16-byte register.
+    fn vst1q_u8(_: &[u8; 16][..1] as [u8; 16]) -> uint8x16_t;
+    /// store an array of 16 `i8` values to one 16-byte register.
+    fn vst1q_s8(_: &[i8; 16][..1] as [i8; 16]) -> int8x16_t;
+    /// store an array of 8 `i16` values to one 16-byte register.
+    fn vst1q_u16(_: &[u16; 8][..1] as [u16; 8]) -> uint16x8_t;
+    /// store an array of 8 `u16` values to one 16-byte register.
+    fn vst1q_s16(_: &[i16; 8][..1] as [i16; 8]) -> int16x8_t;
+    /// store an array of 4 `u32` values to one 16-byte register.
+    fn vst1q_u32(_: &[u32; 4][..1] as [u32; 4]) -> uint32x4_t;
+    /// store an array of 4 `i32` values to one 16-byte register.
+    fn vst1q_s32(_: &[i32; 4][..1] as [i32; 4]) -> int32x4_t;
+    /// store an array of 4 `f32` values to one 16-byte register.
+    fn vst1q_f32(_: &[f32; 4][..1] as [f32; 4]) -> float32x4_t;
+    /// store an array of 2 `u64` value to one 16-byte register.
+    fn vst1q_u64(_: &[u64; 2][..1] as [u64; 2]) -> uint64x2_t;
+    /// store an array of 2 `i64` value to one 16-byte register.
+    fn vst1q_s64(_: &[i64; 2][..1] as [i64; 2]) -> int64x2_t;
+    /// store an array of 2 `f64` value to one 16-byte register.
+    fn vst1q_f64(_: &[f64; 2][..1] as [f64; 2]) -> float64x2_t;
+}
+
+vld_n_replicate_k! {
     unsafe: load;
     size: various_sizes;
 
@@ -270,9 +318,10 @@ mod tests {
 
     // Generate a test for an intrinsic. The primary use of tests is that they execute under Miri,
     // which eliminates most forms of type confusion we could have inadvertently introduced by
-    // mismatching intrinsic types and exposed memory types.
+    // mismatching intrinsic types and exposed memory types. The syntax for this macro also formats
+    // more consistently under rustfmt (one line each).
     macro_rules! test_vld1_from_slice {
-        ($(#[$attr:meta])* $testname:ident, $intrinsic:ident, $base:ty, $ty:ty $(, $with:expr)?) => {
+        ($(#[$attr:meta])* fn $testname:ident, $intrinsic:ident, $base:ty, $ty:ty $(, $with:expr)?) => {
             #[test]
             #[cfg(target_feature = "neon")]
             $(#[$attr])*
@@ -298,70 +347,124 @@ mod tests {
         };
     }
 
-    test_vld1_from_slice!(test_vld1_u8, vld1_u8, u8, arch::uint8x8_t);
-    test_vld1_from_slice!(test_vld1_i8, vld1_s8, i8, arch::int8x8_t);
-    test_vld1_from_slice!(test_vld1_u16, vld1_u16, u16, arch::uint16x4_t);
-    test_vld1_from_slice!(test_vld1_i16, vld1_s16, i16, arch::int16x4_t);
-    test_vld1_from_slice!(test_vld1_u32, vld1_u32, u32, arch::uint32x2_t);
-    test_vld1_from_slice!(test_vld1_i32, vld1_s32, i32, arch::int32x2_t);
-    test_vld1_from_slice!(test_vld1_f32, vld1_f32, f32, arch::float32x2_t);
-    test_vld1_from_slice!(test_vld1_u64, vld1_u64, u64, arch::uint64x1_t, |[val]: [_; 1]| val);
-    test_vld1_from_slice!(test_vld1_i64, vld1_s64, i64, arch::int64x1_t, |[val]: [_; 1]| val);
-    test_vld1_from_slice!(test_vld1_f64, vld1_f64, f64, arch::float64x1_t, |[val]: [_; 1]| val);
+    test_vld1_from_slice!(fn test_vld1_u8, vld1_u8, u8, arch::uint8x8_t);
+    test_vld1_from_slice!(fn test_vld1_i8, vld1_s8, i8, arch::int8x8_t);
+    test_vld1_from_slice!(fn test_vld1_u16, vld1_u16, u16, arch::uint16x4_t);
+    test_vld1_from_slice!(fn test_vld1_i16, vld1_s16, i16, arch::int16x4_t);
+    test_vld1_from_slice!(fn test_vld1_u32, vld1_u32, u32, arch::uint32x2_t);
+    test_vld1_from_slice!(fn test_vld1_i32, vld1_s32, i32, arch::int32x2_t);
+    test_vld1_from_slice!(fn test_vld1_f32, vld1_f32, f32, arch::float32x2_t);
+    test_vld1_from_slice!(fn test_vld1_u64, vld1_u64, u64, arch::uint64x1_t, |[val]: [_; 1]| val);
+    test_vld1_from_slice!(fn test_vld1_i64, vld1_s64, i64, arch::int64x1_t, |[val]: [_; 1]| val);
+    test_vld1_from_slice!(fn test_vld1_f64, vld1_f64, f64, arch::float64x1_t, |[val]: [_; 1]| val);
 
     fn distribute2<T: Copy, const N: usize, const M: usize>(v: [T; N]) -> [[T; M]; 2] {
         <[[T; M]; 2]>::try_from(v.as_chunks::<M>().0).unwrap()
     }
 
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u8_x2, vld1_u8_x2, u8, arch::uint8x8x2_t, distribute2::<_, 16, 8>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i8_x2, vld1_s8_x2, i8, arch::int8x8x2_t, distribute2::<_, 16, 8>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u16_x2, vld1_u16_x2, u16, arch::uint16x4x2_t, distribute2::<_, 8, 4>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i16_x2, vld1_s16_x2, i16, arch::int16x4x2_t, distribute2::<_, 8, 4>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u32_x2, vld1_u32_x2, u32, arch::uint32x2x2_t, distribute2::<_, 4, 2>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i32_x2, vld1_s32_x2, i32, arch::int32x2x2_t, distribute2::<_, 4, 2>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_f32_x2, vld1_f32_x2, f32, arch::float32x2x2_t, distribute2::<_, 4, 2>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u64_x2, vld1_u64_x2, u64, arch::uint64x1x2_t);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i64_x2, vld1_s64_x2, i64, arch::int64x1x2_t);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_f64_x2, vld1_f64_x2, f64, arch::float64x1x2_t);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u8_x2, vld1_u8_x2, u8, arch::uint8x8x2_t, distribute2::<_, 16, 8>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i8_x2, vld1_s8_x2, i8, arch::int8x8x2_t, distribute2::<_, 16, 8>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u16_x2, vld1_u16_x2, u16, arch::uint16x4x2_t, distribute2::<_, 8, 4>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i16_x2, vld1_s16_x2, i16, arch::int16x4x2_t, distribute2::<_, 8, 4>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u32_x2, vld1_u32_x2, u32, arch::uint32x2x2_t, distribute2::<_, 4, 2>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i32_x2, vld1_s32_x2, i32, arch::int32x2x2_t, distribute2::<_, 4, 2>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_f32_x2, vld1_f32_x2, f32, arch::float32x2x2_t, distribute2::<_, 4, 2>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u64_x2, vld1_u64_x2, u64, arch::uint64x1x2_t);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i64_x2, vld1_s64_x2, i64, arch::int64x1x2_t);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_f64_x2, vld1_f64_x2, f64, arch::float64x1x2_t);
 
     fn distribute3<T: Copy, const N: usize, const M: usize>(v: [T; N]) -> [[T; M]; 3] {
         <[[T; M]; 3]>::try_from(v.as_chunks::<M>().0).unwrap()
     }
 
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u8_x3, vld1_u8_x3, u8, arch::uint8x8x3_t, distribute3::<_, 24, 8>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i8_x3, vld1_s8_x3, i8, arch::int8x8x3_t, distribute3::<_, 24, 8>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u16_x3, vld1_u16_x3, u16, arch::uint16x4x3_t, distribute3::<_, 12, 4>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i16_x3, vld1_s16_x3, i16, arch::int16x4x3_t, distribute3::<_, 12, 4>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u32_x3, vld1_u32_x3, u32, arch::uint32x2x3_t, distribute3::<_, 6, 2>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i32_x3, vld1_s32_x3, i32, arch::int32x2x3_t, distribute3::<_, 6, 2>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_f32_x3, vld1_f32_x3, f32, arch::float32x2x3_t, distribute3::<_, 6, 2>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u64_x3, vld1_u64_x3, u64, arch::uint64x1x3_t);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i64_x3, vld1_s64_x3, i64, arch::int64x1x3_t);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_f64_x3, vld1_f64_x3, f64, arch::float64x1x3_t);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u8_x3, vld1_u8_x3, u8, arch::uint8x8x3_t, distribute3::<_, 24, 8>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i8_x3, vld1_s8_x3, i8, arch::int8x8x3_t, distribute3::<_, 24, 8>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u16_x3, vld1_u16_x3, u16, arch::uint16x4x3_t, distribute3::<_, 12, 4>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i16_x3, vld1_s16_x3, i16, arch::int16x4x3_t, distribute3::<_, 12, 4>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u32_x3, vld1_u32_x3, u32, arch::uint32x2x3_t, distribute3::<_, 6, 2>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i32_x3, vld1_s32_x3, i32, arch::int32x2x3_t, distribute3::<_, 6, 2>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_f32_x3, vld1_f32_x3, f32, arch::float32x2x3_t, distribute3::<_, 6, 2>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u64_x3, vld1_u64_x3, u64, arch::uint64x1x3_t);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i64_x3, vld1_s64_x3, i64, arch::int64x1x3_t);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_f64_x3, vld1_f64_x3, f64, arch::float64x1x3_t);
 
     fn distribute4<T: Copy, const N: usize, const M: usize>(v: [T; N]) -> [[T; M]; 4] {
         <[[T; M]; 4]>::try_from(v.as_chunks::<M>().0).unwrap()
     }
 
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u8_x4, vld1_u8_x4, u8, arch::uint8x8x4_t, distribute4::<_, 32, 8>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i8_x4, vld1_s8_x4, i8, arch::int8x8x4_t, distribute4::<_, 32, 8>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u16_x4, vld1_u16_x4, u16, arch::uint16x4x4_t, distribute4::<_, 16, 4>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i16_x4, vld1_s16_x4, i16, arch::int16x4x4_t, distribute4::<_, 16, 4>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u32_x4, vld1_u32_x4, u32, arch::uint32x2x4_t, distribute4::<_, 8, 2>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i32_x4, vld1_s32_x4, i32, arch::int32x2x4_t, distribute4::<_, 8, 2>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_f32_x4, vld1_f32_x4, f32, arch::float32x2x4_t, distribute4::<_, 8, 2>);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_u64_x4, vld1_u64_x4, u64, arch::uint64x1x4_t);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_i64_x4, vld1_s64_x4, i64, arch::int64x1x4_t);
-    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] test_vld1_f64_x4, vld1_f64_x4, f64, arch::float64x1x4_t);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u8_x4, vld1_u8_x4, u8, arch::uint8x8x4_t, distribute4::<_, 32, 8>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i8_x4, vld1_s8_x4, i8, arch::int8x8x4_t, distribute4::<_, 32, 8>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u16_x4, vld1_u16_x4, u16, arch::uint16x4x4_t, distribute4::<_, 16, 4>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i16_x4, vld1_s16_x4, i16, arch::int16x4x4_t, distribute4::<_, 16, 4>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u32_x4, vld1_u32_x4, u32, arch::uint32x2x4_t, distribute4::<_, 8, 2>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i32_x4, vld1_s32_x4, i32, arch::int32x2x4_t, distribute4::<_, 8, 2>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_f32_x4, vld1_f32_x4, f32, arch::float32x2x4_t, distribute4::<_, 8, 2>);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_u64_x4, vld1_u64_x4, u64, arch::uint64x1x4_t);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_i64_x4, vld1_s64_x4, i64, arch::int64x1x4_t);
+    test_vld1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vld1_f64_x4, vld1_f64_x4, f64, arch::float64x1x4_t);
 
-    test_vld1_from_slice!(test_vld1q_u8, vld1q_u8, u8, arch::uint8x16_t);
-    test_vld1_from_slice!(test_vld1q_i8, vld1q_s8, i8, arch::int8x16_t);
-    test_vld1_from_slice!(test_vld1q_u16, vld1q_u16, u16, arch::uint16x8_t);
-    test_vld1_from_slice!(test_vld1q_i16, vld1q_s16, i16, arch::int16x8_t);
-    test_vld1_from_slice!(test_vld1q_u32, vld1q_u32, u32, arch::uint32x4_t);
-    test_vld1_from_slice!(test_vld1q_i32, vld1q_s32, i32, arch::int32x4_t);
-    test_vld1_from_slice!(test_vld1q_f32, vld1q_f32, f32, arch::float32x4_t);
-    test_vld1_from_slice!(test_vld1q_u64, vld1q_u64, u64, arch::uint64x2_t);
-    test_vld1_from_slice!(test_vld1q_i64, vld1q_s64, i64, arch::int64x2_t);
-    test_vld1_from_slice!(test_vld1q_f64, vld1q_f64, f64, arch::float64x2_t);
+    test_vld1_from_slice!(fn test_vld1q_u8, vld1q_u8, u8, arch::uint8x16_t);
+    test_vld1_from_slice!(fn test_vld1q_i8, vld1q_s8, i8, arch::int8x16_t);
+    test_vld1_from_slice!(fn test_vld1q_u16, vld1q_u16, u16, arch::uint16x8_t);
+    test_vld1_from_slice!(fn test_vld1q_i16, vld1q_s16, i16, arch::int16x8_t);
+    test_vld1_from_slice!(fn test_vld1q_u32, vld1q_u32, u32, arch::uint32x4_t);
+    test_vld1_from_slice!(fn test_vld1q_i32, vld1q_s32, i32, arch::int32x4_t);
+    test_vld1_from_slice!(fn test_vld1q_f32, vld1q_f32, f32, arch::float32x4_t);
+    test_vld1_from_slice!(fn test_vld1q_u64, vld1q_u64, u64, arch::uint64x2_t);
+    test_vld1_from_slice!(fn test_vld1q_i64, vld1q_s64, i64, arch::int64x2_t);
+    test_vld1_from_slice!(fn test_vld1q_f64, vld1q_f64, f64, arch::float64x2_t);
+
+    // Generate a test for an intrinsic. The primary use of tests is that they execute under Miri,
+    // which eliminates most forms of type confusion we could have inadvertently introduced by
+    // mismatching intrinsic types and exposed memory types. The syntax for this macro also formats
+    // more consistently under rustfmt (one line each).
+    macro_rules! test_vst1_from_slice {
+        ($(#[$attr:meta])* fn $testname:ident, $intrinsic:ident, $base:ty, $ty:ty $(, $with:expr)?) => {
+            #[test]
+            #[cfg(target_feature = "neon")]
+            $(#[$attr])*
+            fn $testname() {
+                fn generate<const N: usize>(val: &[$base; N]) -> $ty {
+                    unsafe { core::mem::transmute_copy::<[$base; N], $ty>(val) }
+                }
+
+                fn result_init<T, const N: usize>() -> [T; N] {
+                    unsafe { core::mem::zeroed() }
+                }
+
+                // Help the type unification between source and result.
+                fn assert_eq<T: PartialEq + core::fmt::Debug, const N: usize>(a: &[T; N], b: &[T; N]) {
+                    assert_eq!(a, b);
+                }
+
+                #[target_feature(enable = "neon")]
+                fn test() {
+                    let ground_truth = core::array::from_fn(|i| i as $base);
+                    let argument = generate(&ground_truth);
+
+                    let mut result = result_init();
+                    super::$intrinsic(&mut result, argument);
+
+                    $( // optionally we need to change the type from a flat array.
+                        let ground_truth = $with(source);
+                    )?
+
+                    assert_eq(&result, &ground_truth);
+                }
+
+                unsafe { test() }
+            }
+        };
+    }
+
+    test_vst1_from_slice!(fn test_vst1q_u8, vst1q_u8, u8, arch::uint8x16_t);
+    test_vst1_from_slice!(fn test_vst1q_i8, vst1q_s8, i8, arch::int8x16_t);
+    test_vst1_from_slice!(fn test_vst1q_u16, vst1q_u16, u16, arch::uint16x8_t);
+    test_vst1_from_slice!(fn test_vst1q_i16, vst1q_s16, i16, arch::int16x8_t);
+    test_vst1_from_slice!(fn test_vst1q_u32, vst1q_u32, u32, arch::uint32x4_t);
+    test_vst1_from_slice!(fn test_vst1q_i32, vst1q_s32, i32, arch::int32x4_t);
+    test_vst1_from_slice!(fn test_vst1q_f32, vst1q_f32, f32, arch::float32x4_t);
+    test_vst1_from_slice!(fn test_vst1q_u64, vst1q_u64, u64, arch::uint64x2_t);
+    test_vst1_from_slice!(fn test_vst1q_i64, vst1q_s64, i64, arch::int64x2_t);
+    test_vst1_from_slice!(fn test_vst1q_f64, vst1q_f64, f64, arch::float64x2_t);
 }
