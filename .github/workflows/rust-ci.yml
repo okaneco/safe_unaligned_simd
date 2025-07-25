@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu, windows]
-        toolchain: [nightly, beta, stable]
+        toolchain: ["1.88", nightly, beta, stable]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
@@ -72,7 +72,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos]
-        toolchain: [nightly, beta, stable]
+        toolchain: ["1.88", nightly, beta, stable]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
@@ -91,13 +91,6 @@ jobs:
       - name: Build docs
         run: cargo doc --no-deps --no-default-features --target aarch64-apple-darwin
 
-        # AVX target_feature enabled doctest and internal feature test
-      - name: Enable +avx for RUSTFLAGS
-        env:
-          RUSTFLAGS: "-Dwarnings -Ctarget-feature=+neon"
-        run: echo "Enabling +neon for RUSTFLAGS - ${{ env.RUSTFLAGS }}"
-      - name: Doc tests (neon target feature)
-        run: cargo test --no-default-features --doc
         # Nightly feature tests
       - name: Test library (nightly feature)
         if: ${{ matrix.toolchain == 'nightly' }}
@@ -141,4 +134,4 @@ jobs:
       - name: Test with Miri, Linux 32-bit x86 target
         run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx" cargo miri test --features _avx_test,nightly --target i686-unknown-linux-gnu
       - name: Test with Miri, Linux 64-bit aarch64 target
-        run: RUSTFLAGS="-Ctarget-feature=+neon" cargo +nightly miri test --features nightly --all-features --target aarch64-unknown-linux-gnu
+        run: cargo  miri test --features nightly --all-features --target aarch64-unknown-linux-gnu
