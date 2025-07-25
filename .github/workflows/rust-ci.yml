@@ -92,7 +92,9 @@ jobs:
           rustup toolchain install nightly --component miri
           rustup override set nightly
           cargo miri setup
-      - name: Test with Miri, Linux 64-bit target
+      - name: Test with Miri, Linux 64-bit x86_64 target
         run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx" cargo miri test --features _avx_test,nightly --target x86_64-unknown-linux-gnu
-      - name: Test with Miri, Linux 32-bit target
+      - name: Test with Miri, Linux 32-bit x86 target
         run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx" cargo miri test --features _avx_test,nightly --target i686-unknown-linux-gnu
+      - name: Test with Miri, Linux 64-bit aarch64 target
+        run: RUSTFLAGS="-Ctarget-feature=+neon" cargo +nightly miri test --features nightly --all-features --target aarch64-unknown-linux-gnu
