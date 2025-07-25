@@ -65,6 +65,50 @@ jobs:
         if: ${{ matrix.toolchain == 'nightly' }}
         run: cargo doc --no-deps --no-default-features --features nightly
 
+  build-aarch64:
+    name: Build and test crate
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos]
+        toolchain: [nightly, beta, stable]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: rust-docs
+          targets: aarch64-apple-darwin
+
+        # Default build, no features
+      - name: Build library
+        run: cargo build -v --lib --no-default-features --target aarch64-apple-darwin
+      - name: Test library
+        run: cargo test --no-default-features --lib --target aarch64-apple-darwin
+      - name: Doc tests
+        run: cargo test --no-default-features --doc --target aarch64-apple-darwin
+      - name: Build docs
+        run: cargo doc --no-deps --no-default-features --target aarch64-apple-darwin
+
+        # AVX target_feature enabled doctest and internal feature test
+      - name: Enable +avx for RUSTFLAGS
+        env:
+          RUSTFLAGS: "-Dwarnings -Ctarget-feature=+neon"
+        run: echo "Enabling +neon for RUSTFLAGS - ${{ env.RUSTFLAGS }}"
+      - name: Doc tests (neon target feature)
+        run: cargo test --no-default-features --doc
+        # Nightly feature tests
+      - name: Test library (nightly feature)
+        if: ${{ matrix.toolchain == 'nightly' }}
+        run: cargo test --no-default-features --lib --features nightly
+      - name: Doc tests (nightly feature)
+        if: ${{ matrix.toolchain == 'nightly' }}
+        run: cargo test --no-default-features --doc --features nightly
+      - name: Build docs (nightly)
+        if: ${{ matrix.toolchain == 'nightly' }}
+        run: cargo doc --no-deps --no-default-features --features nightly
+
   clippy-rustfmt:
     name: Clippy and rustfmt
     runs-on: ubuntu-latest
