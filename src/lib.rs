@@ -13,6 +13,9 @@
 //! ### `x86`, `x86_64`
 //! - `sse`, `sse2`, `avx`
 //!
+//! Some functions have variants that are generic over `Cell` array types,
+//! which allow for mutation of shared references.
+//!
 //! Currently, there is no plan to implement gather/scatter or masked load/store
 //! intrinsics for this platform.
 //!

@@ -17,6 +17,8 @@ Platform-intrinsics that take raw pointers have been wrapped in functions that r
 ### `x86`, `x86_64`
 - `sse`, `sse2`, `avx`
 
+Some functions have variants that are generic over `Cell` array types, which allow for mutation of shared references.
+
 Some example function signatures:
 ```rust
 #[target_feature(enable = "sse")]
