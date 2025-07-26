@@ -27,6 +27,9 @@
 #![forbid(missing_docs, non_ascii_idents)]
 #![cfg_attr(not(test), no_std)]
 
+#[cfg(target_arch = "wasm32")]
+pub mod wasm32;
+
 #[cfg(target_arch = "x86")]
 pub mod x86;
 
