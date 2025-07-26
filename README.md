@@ -6,11 +6,11 @@
 
 Safe wrappers for unaligned SIMD load and store operations.
 
-The goal of this crate is to remove the need for "unnecessary `unsafe`" code when using memory vector intrinsics, with no alignment requirements.
+The goal of this crate is to remove the need for "unnecessary `unsafe`" code when using vector intrinsics to access memory, with no alignment requirements.
 
 Platform-intrinsics that take raw pointers have been wrapped in functions that receive Rust reference types as arguments.
 
-**MSRV**: 1.87
+**MSRV**: 1.88
 
 ## Implemented Intrinsics
 

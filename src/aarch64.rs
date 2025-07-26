@@ -2,24 +2,24 @@
 //!
 //! # Safety
 //!
-//! Vectored store and load instructions are encoded with an optional `<align>` field which none of
-//! the intrinsics here set themselves. (It could hint alignment 64/128/256). The field is then the
-//! default for which [the Neon programmer's guide][neon-documentation] (not the most stable link)
+//! Vectored load and store instructions are encoded with an optional `<align>` field which none of
+//! the intrinsics here set themselves (it can hint alignment 64/128/256). The field is then the
+//! default for which the [Neon programmer's guide][neon-documentation] (not the most stable link)
 //! notes the following:
 //!
-//! <i>When the alignment is not specified in the instruction, the alignment restriction is
+//! > <i>When the alignment is not specified in the instruction, the alignment restriction is
 //! controlled by the A bit \[of SCTLR\] \[… and\] if the A bit is 1, accesses must be element
 //! aligned.</i>
 //!
 //! [neon-documentation]: https://developer.arm.com/documentation/den0018/a/NEON-and-VFP-Instruction-Summary/NEON-load-and-store-instructions/VLDn--single-n-element-structure-to-all-lanes-?lang=en
 //!
-//! **Prior to version 20, llvm always inserted alignment assertions into the intrinsics. The crate
-//! is not sound prior to the bug fix (June 2025, rustc 1.88) with the LLVM backend. Other backends
-//! have not been verified.**
+//! **Prior to version 20, LLVM always inserted alignment assertions into the intrinsics. The crate
+//! is not sound  with the LLVM backend prior to the bug fix present in `rustc 1.88.0` (2025-06-23).
+//! Other backends have not been verified.**
 //!
-//! You *could* use all these intrinsics with completely unaligned memory if you set SCTLR, the
-//! system control register, which is not part of the guarantees. So we do not allow those. To load
-//! unaligned floating point data, use an appropriate u8xN type and reinterpret the vector.
+//! You *could* use all of these intrinsics with completely unaligned memory if you set the SCTLR,
+//! the system control register. Since we do not provide this guarantee, we do not allow that. To load
+//! unaligned floating point data, use an appropriate `u8xN` type and reinterpret the vector.
 //!
 //! See: <https://developer.arm.com/documentation/ddi0597/2025-06/SIMD-FP-Instructions/> on VLD1
 #![cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
