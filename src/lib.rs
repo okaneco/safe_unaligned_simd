@@ -3,7 +3,8 @@
 //! ## Overview
 //!
 //! The goal of this crate is to remove the need for "unnecessary `unsafe`" code
-//! when using vector intrinsics with no alignment requirements.
+//! when using vector intrinsics to access memory, with no alignment
+//! requirements.
 //!
 //! Platform-intrinsics that take raw pointers have been wrapped in functions
 //! that receive Rust reference types as arguments.
@@ -30,11 +31,11 @@
 #![forbid(missing_docs, non_ascii_idents)]
 #![cfg_attr(not(test), no_std)]
 
-#[cfg(target_arch = "x86")]
-pub mod x86;
-
 #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
 pub mod aarch64;
+
+#[cfg(target_arch = "x86")]
+pub mod x86;
 
 #[cfg(target_arch = "x86_64")]
 mod x86;
