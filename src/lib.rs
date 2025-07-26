@@ -16,6 +16,11 @@
 //! Currently, there is no plan to implement gather/scatter or masked load/store
 //! intrinsics for this platform.
 //!
+//! ### `aarch64`, `arm64ec`
+//! - `neon`
+//!
+//! Intrinsics that load / store individual lanes are not designed yet.
+//!
 //! ### Other platforms
 //!
 //! Not yet supported.
@@ -24,6 +29,9 @@
 
 #[cfg(target_arch = "x86")]
 pub mod x86;
+
+#[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
+pub mod aarch64;
 
 #[cfg(target_arch = "x86_64")]
 mod x86;

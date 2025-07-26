@@ -2,7 +2,7 @@
 name = "safe_unaligned_simd"
 version = "0.1.1"
 edition = "2024"
-rust-version = "1.87"
+rust-version = "1.88"
 license = "MIT OR Apache-2.0"
 exclude = [".github", ""]
 
@@ -29,4 +29,4 @@ _avx_test = []
 [package.metadata.docs.rs]
 no-default-features = true
 features = [""]
-targets = ["x86_64-unknown-linux-gnu"]
+targets = ["aarch64-apple-darwin", "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu"]

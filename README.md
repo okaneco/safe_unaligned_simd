@@ -6,7 +6,7 @@
 
 Safe wrappers for unaligned SIMD load and store operations.
 
-The goal of this crate is to remove the need for "unnecessary `unsafe`" code when using vector intrinsics with no alignment requirements.
+The goal of this crate is to remove the need for "unnecessary `unsafe`" code when using memory vector intrinsics, with no alignment requirements.
 
 Platform-intrinsics that take raw pointers have been wrapped in functions that receive Rust reference types as arguments.
 
@@ -28,6 +28,17 @@ fn _mm256_loadu2_m128(hiaddr: &[f32; 4], loaddr: &[f32; 4]) -> __m256;
 ```
 
 Currently, there is no plan to implement gather/scatter or masked load/store intrinsics for this platform.
+
+### `aarch64` / `arm64ec`
+- `neon`
+
+Some example function signatures:
+```rust
+#[target_feature(enable = "neon")]
+fn vld2_dup_s8(from: &[i8; 2]) -> int8x8x2_t;
+#[target_feature(enable = "neon")]
+fn vst1q_f64(into: &mut [f64; 2], val: float64x2_t);
+```
 
 ### Other platforms
 
