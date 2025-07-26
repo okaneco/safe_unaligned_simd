@@ -500,6 +500,60 @@ vld_n_replicate_k! {
     unsafe: load;
     size: various_sizes;
 
+    /// Load one single-element `i8` and replicate to all lanes.
+    fn vld1_dup_s8(_: &[i8; 1][..1] as i8) -> int8x8_t;
+    /// Load an array of two `i8` elements and replicate to lanes of two registers.
+    fn vld2_dup_s8(_: &[i8; 2][..1] as [i8; 2]) -> int8x8x2_t;
+    /// Load an array of three `i8` elements and replicate to lanes of three registers.
+    fn vld3_dup_s8(_: &[i8; 3][..1] as [i8; 3]) -> int8x8x3_t;
+    /// Load an array of four `i8` elements and replicate to lanes of four registers.
+    fn vld4_dup_s8(_: &[i8; 4][..1] as [i8; 4]) -> int8x8x4_t;
+
+    /// Load one single-element `u8` and replicate to all lanes.
+    fn vld1_dup_u8(_: &[u8; 1][..1] as u8) -> uint8x8_t;
+    /// Load an array of two `u8` elements and replicate to lanes of two registers.
+    fn vld2_dup_u8(_: &[u8; 2][..1] as [u8; 2]) -> uint8x8x2_t;
+    /// Load an array of three `u8` elements and replicate to lanes of three registers.
+    fn vld3_dup_u8(_: &[u8; 3][..1] as [u8; 3]) -> uint8x8x3_t;
+    /// Load an array of four `u8` elements and replicate to lanes of four registers.
+    fn vld4_dup_u8(_: &[u8; 4][..1] as [u8; 4]) -> uint8x8x4_t;
+
+    /// Load one single-element `i16` and replicate to all lanes.
+    fn vld1_dup_s16(_: &[i16; 1][..1] as i16) -> int16x4_t;
+    /// Load an array of two `i16` elements and replicate to lanes of two registers.
+    fn vld2_dup_s16(_: &[i16; 2][..1] as [i16; 2]) -> int16x4x2_t;
+    /// Load an array of three `i16` elements and replicate to lanes of three registers.
+    fn vld3_dup_s16(_: &[i16; 3][..1] as [i16; 3]) -> int16x4x3_t;
+    /// Load an array of four `i16` elements and replicate to lanes of four registers.
+    fn vld4_dup_s16(_: &[i16; 4][..1] as [i16; 4]) -> int16x4x4_t;
+
+    /// Load one single-element `u16` and replicate to all lanes.
+    fn vld1_dup_u16(_: &[u16; 1][..1] as u16) -> uint16x4_t;
+    /// Load an array of two `u16` elements and replicate to lanes of two registers.
+    fn vld2_dup_u16(_: &[u16; 2][..1] as [u16; 2]) -> uint16x4x2_t;
+    /// Load an array of three `u16` elements and replicate to lanes of three registers.
+    fn vld3_dup_u16(_: &[u16; 3][..1] as [u16; 3]) -> uint16x4x3_t;
+    /// Load an array of four `u16` elements and replicate to lanes of four registers.
+    fn vld4_dup_u16(_: &[u16; 4][..1] as [u16; 4]) -> uint16x4x4_t;
+
+    /// Load one single-element `i32` and replicate to all lanes.
+    fn vld1_dup_s32(_: &[i32; 1][..1] as i32) -> int32x2_t;
+    /// Load an array of two `i32` elements and replicate to lanes of two registers.
+    fn vld2_dup_s32(_: &[i32; 2][..1] as [i32; 2]) -> int32x2x2_t;
+    /// Load an array of three `i32` elements and replicate to lanes of three registers.
+    fn vld3_dup_s32(_: &[i32; 3][..1] as [i32; 3]) -> int32x2x3_t;
+    /// Load an array of four `i32` elements and replicate to lanes of four registers.
+    fn vld4_dup_s32(_: &[i32; 4][..1] as [i32; 4]) -> int32x2x4_t;
+
+    /// Load one single-element `u32` and replicate to all lanes.
+    fn vld1_dup_u32(_: &[u32; 1][..1] as u32) -> uint32x2_t;
+    /// Load an array of two `u32` elements and replicate to lanes of two registers.
+    fn vld2_dup_u32(_: &[u32; 2][..1] as [u32; 2]) -> uint32x2x2_t;
+    /// Load an array of three `u32` elements and replicate to lanes of three registers.
+    fn vld3_dup_u32(_: &[u32; 3][..1] as [u32; 3]) -> uint32x2x3_t;
+    /// Load an array of four `u32` elements and replicate to lanes of four registers.
+    fn vld4_dup_u32(_: &[u32; 4][..1] as [u32; 4]) -> uint32x2x4_t;
+
     /// Load one single-element `f32` and replicate to all lanes.
     fn vld1_dup_f32(_: &[f32; 1][..1] as f32) -> float32x2_t;
     /// Load an array of two `f32` elements and replicate to lanes of two registers.
@@ -509,6 +563,24 @@ vld_n_replicate_k! {
     /// Load an array of four `f32` elements and replicate to lanes of four registers.
     fn vld4_dup_f32(_: &[f32; 4][..1] as [f32; 4]) -> float32x2x4_t;
 
+    /// Load one single-element `i64` and replicate to all lanes.
+    fn vld1_dup_s64(_: &[i64; 1][..1] as i64) -> int64x1_t;
+    /// Load an array of two `i64` elements and replicate to lanes of two registers.
+    fn vld2_dup_s64(_: &[i64; 2][..1] as [i64; 2]) -> int64x1x2_t;
+    /// Load an array of three `i64` elements and replicate to lanes of three registers.
+    fn vld3_dup_s64(_: &[i64; 3][..1] as [i64; 3]) -> int64x1x3_t;
+    /// Load an array of four `i64` elements and replicate to lanes of four registers.
+    fn vld4_dup_s64(_: &[i64; 4][..1] as [i64; 4]) -> int64x1x4_t;
+
+    /// Load one single-element `u64` and replicate to all lanes.
+    fn vld1_dup_u64(_: &[u64; 1][..1] as u64) -> uint64x1_t;
+    /// Load an array of two `u64` elements and replicate to lanes of two registers.
+    fn vld2_dup_u64(_: &[u64; 2][..1] as [u64; 2]) -> uint64x1x2_t;
+    /// Load an array of three `u64` elements and replicate to lanes of three registers.
+    fn vld3_dup_u64(_: &[u64; 3][..1] as [u64; 3]) -> uint64x1x3_t;
+    /// Load an array of four `u64` elements and replicate to lanes of four registers.
+    fn vld4_dup_u64(_: &[u64; 4][..1] as [u64; 4]) -> uint64x1x4_t;
+
     /// Load one single-element `f64` and replicate to all lanes.
     fn vld1_dup_f64(_: &[f64; 1][..1] as f64) -> float64x1_t;
     /// Load an array of two `f64` elements and replicate to lanes of two registers.
@@ -517,6 +589,65 @@ vld_n_replicate_k! {
     fn vld3_dup_f64(_: &[f64; 3][..1] as [f64; 3]) -> float64x1x3_t;
     /// Load an array of four `f64` elements and replicate to lanes of four registers.
     fn vld4_dup_f64(_: &[f64; 4][..1] as [f64; 4]) -> float64x1x4_t;
+}
+
+vld_n_replicate_k! {
+    unsafe: load;
+    size: various_sizes;
+
+    /// Load one single-element `i8` and replicate to all lanes.
+    fn vld1q_dup_s8(_: &[i8; 1][..1] as i8) -> int8x16_t;
+    /// Load an array of two `i8` elements and replicate to lanes of two registers.
+    fn vld2q_dup_s8(_: &[i8; 2][..1] as [i8; 2]) -> int8x16x2_t;
+    /// Load an array of three `i8` elements and replicate to lanes of three registers.
+    fn vld3q_dup_s8(_: &[i8; 3][..1] as [i8; 3]) -> int8x16x3_t;
+    /// Load an array of four `i8` elements and replicate to lanes of four registers.
+    fn vld4q_dup_s8(_: &[i8; 4][..1] as [i8; 4]) -> int8x16x4_t;
+
+    /// Load one single-element `u8` and replicate to all lanes.
+    fn vld1q_dup_u8(_: &[u8; 1][..1] as u8) -> uint8x16_t;
+    /// Load an array of two `u8` elements and replicate to lanes of two registers.
+    fn vld2q_dup_u8(_: &[u8; 2][..1] as [u8; 2]) -> uint8x16x2_t;
+    /// Load an array of three `u8` elements and replicate to lanes of three registers.
+    fn vld3q_dup_u8(_: &[u8; 3][..1] as [u8; 3]) -> uint8x16x3_t;
+    /// Load an array of four `u8` elements and replicate to lanes of four registers.
+    fn vld4q_dup_u8(_: &[u8; 4][..1] as [u8; 4]) -> uint8x16x4_t;
+
+    /// Load one single-element `i16` and replicate to all lanes.
+    fn vld1q_dup_s16(_: &[i16; 1][..1] as i16) -> int16x8_t;
+    /// Load an array of two `i16` elements and replicate to lanes of two registers.
+    fn vld2q_dup_s16(_: &[i16; 2][..1] as [i16; 2]) -> int16x8x2_t;
+    /// Load an array of three `i16` elements and replicate to lanes of three registers.
+    fn vld3q_dup_s16(_: &[i16; 3][..1] as [i16; 3]) -> int16x8x3_t;
+    /// Load an array of four `i16` elements and replicate to lanes of four registers.
+    fn vld4q_dup_s16(_: &[i16; 4][..1] as [i16; 4]) -> int16x8x4_t;
+
+    /// Load one single-element `u16` and replicate to all lanes.
+    fn vld1q_dup_u16(_: &[u16; 1][..1] as u16) -> uint16x8_t;
+    /// Load an array of two `u16` elements and replicate to lanes of two registers.
+    fn vld2q_dup_u16(_: &[u16; 2][..1] as [u16; 2]) -> uint16x8x2_t;
+    /// Load an array of three `u16` elements and replicate to lanes of three registers.
+    fn vld3q_dup_u16(_: &[u16; 3][..1] as [u16; 3]) -> uint16x8x3_t;
+    /// Load an array of four `u16` elements and replicate to lanes of four registers.
+    fn vld4q_dup_u16(_: &[u16; 4][..1] as [u16; 4]) -> uint16x8x4_t;
+
+    /// Load one single-element `i32` and replicate to all lanes.
+    fn vld1q_dup_s32(_: &[i32; 1][..1] as i32) -> int32x4_t;
+    /// Load an array of two `i32` elements and replicate to lanes of two registers.
+    fn vld2q_dup_s32(_: &[i32; 2][..1] as [i32; 2]) -> int32x4x2_t;
+    /// Load an array of three `i32` elements and replicate to lanes of three registers.
+    fn vld3q_dup_s32(_: &[i32; 3][..1] as [i32; 3]) -> int32x4x3_t;
+    /// Load an array of four `i32` elements and replicate to lanes of four registers.
+    fn vld4q_dup_s32(_: &[i32; 4][..1] as [i32; 4]) -> int32x4x4_t;
+
+    /// Load one single-element `u32` and replicate to all lanes.
+    fn vld1q_dup_u32(_: &[u32; 1][..1] as u32) -> uint32x4_t;
+    /// Load an array of two `u32` elements and replicate to lanes of two registers.
+    fn vld2q_dup_u32(_: &[u32; 2][..1] as [u32; 2]) -> uint32x4x2_t;
+    /// Load an array of three `u32` elements and replicate to lanes of three registers.
+    fn vld3q_dup_u32(_: &[u32; 3][..1] as [u32; 3]) -> uint32x4x3_t;
+    /// Load an array of four `u32` elements and replicate to lanes of four registers.
+    fn vld4q_dup_u32(_: &[u32; 4][..1] as [u32; 4]) -> uint32x4x4_t;
 
     /// Load one single-element `f32` and replicate to all lanes.
     fn vld1q_dup_f32(_: &[f32; 1][..1] as f32) -> float32x4_t;
@@ -526,6 +657,33 @@ vld_n_replicate_k! {
     fn vld3q_dup_f32(_: &[f32; 3][..1] as [f32; 3]) -> float32x4x3_t;
     /// Load an array of four `f32` elements and replicate to lanes of four registers.
     fn vld4q_dup_f32(_: &[f32; 4][..1] as [f32; 4]) -> float32x4x4_t;
+
+    /// Load one single-element `i64` and replicate to all lanes.
+    fn vld1q_dup_s64(_: &[i64; 1][..1] as i64) -> int64x2_t;
+    /// Load an array of two `i64` elements and replicate to lanes of two registers.
+    fn vld2q_dup_s64(_: &[i64; 2][..1] as [i64; 2]) -> int64x2x2_t;
+    /// Load an array of three `i64` elements and replicate to lanes of three registers.
+    fn vld3q_dup_s64(_: &[i64; 3][..1] as [i64; 3]) -> int64x2x3_t;
+    /// Load an array of four `i64` elements and replicate to lanes of four registers.
+    fn vld4q_dup_s64(_: &[i64; 4][..1] as [i64; 4]) -> int64x2x4_t;
+
+    /// Load one single-element `u64` and replicate to all lanes.
+    fn vld1q_dup_u64(_: &[u64; 1][..1] as u64) -> uint64x2_t;
+    /// Load an array of two `u64` elements and replicate to lanes of two registers.
+    fn vld2q_dup_u64(_: &[u64; 2][..1] as [u64; 2]) -> uint64x2x2_t;
+    /// Load an array of three `u64` elements and replicate to lanes of three registers.
+    fn vld3q_dup_u64(_: &[u64; 3][..1] as [u64; 3]) -> uint64x2x3_t;
+    /// Load an array of four `u64` elements and replicate to lanes of four registers.
+    fn vld4q_dup_u64(_: &[u64; 4][..1] as [u64; 4]) -> uint64x2x4_t;
+
+    /// Load one single-element `f64` and replicate to all lanes.
+    fn vld1q_dup_f64(_: &[f64; 1][..1] as f64) -> float64x2_t;
+    /// Load an array of two `f64` elements and replicate to lanes of two registers.
+    fn vld2q_dup_f64(_: &[f64; 2][..1] as [f64; 2]) -> float64x2x2_t;
+    /// Load an array of three `f64` elements and replicate to lanes of three registers.
+    fn vld3q_dup_f64(_: &[f64; 3][..1] as [f64; 3]) -> float64x2x3_t;
+    /// Load an array of four `f64` elements and replicate to lanes of four registers.
+    fn vld4q_dup_f64(_: &[f64; 4][..1] as [f64; 4]) -> float64x2x4_t;
 }
 
 #[cfg(test)]
@@ -581,7 +739,9 @@ mod tests {
     test_vld1_from_slice!(fn test_vld1_i64, vld1_s64, i64, arch::int64x1_t, |[val]: [_; 1]| val);
     test_vld1_from_slice!(fn test_vld1_f64, vld1_f64, f64, arch::float64x1_t, |[val]: [_; 1]| val);
 
-    fn as_chunks<T: Copy, const L: usize, const N: usize, const M: usize>(v: [T; N]) -> [[T; M]; L] {
+    fn as_chunks<T: Copy, const L: usize, const N: usize, const M: usize>(
+        v: [T; N],
+    ) -> [[T; M]; L] {
         <[[T; M]; L]>::try_from(v.as_chunks::<M>().0).unwrap()
     }
 
@@ -805,4 +965,193 @@ mod tests {
     test_vst1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vst1q_u64_x4, vst1q_u64_x4, u64, arch::uint64x2x4_t, flatten::<_, 4, 8, 2>);
     test_vst1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vst1q_i64_x4, vst1q_s64_x4, i64, arch::int64x2x4_t, flatten::<_, 4, 8, 2>);
     test_vst1_from_slice!(#[cfg_attr(miri, ignore)] fn test_vst1q_f64_x4, vst1q_f64_x4, f64, arch::float64x2x4_t, flatten::<_, 4, 8, 2>);
+
+    macro_rules! test_vldup {
+        // The *dup* family is always 4 different functions so let's do them in one macro call.
+        ($(#[$attr:meta])*
+         fn [$test1:ident, $test2:ident, $test3:ident, $test4:ident],
+            [$intr1:ident, $intr2:ident, $intr3:ident, $intr4:ident],
+            $base:ty,
+            [$ty1:ty, $ty2:ty, $ty3:ty, $ty4:ty]
+        ) => {
+            test_vldup!(@$(#[$attr])* fn ([$test1], [$intr1], $base, [$ty1], 1) => |c| &c[0]);
+            test_vldup!(@$(#[$attr])* #[cfg_attr(miri, ignore)] fn ([$test2], [$intr2], $base, [$ty2], 2) => |c| &c);
+            test_vldup!(@$(#[$attr])* #[cfg_attr(miri, ignore)] fn ([$test3], [$intr3], $base, [$ty3], 3) => |c| &c);
+            test_vldup!(@$(#[$attr])* #[cfg_attr(miri, ignore)] fn ([$test4], [$intr4], $base, [$ty4], 4) => |c| &c);
+        };
+
+        (@$(#[$attr:meta])* fn ([$test1:ident], [$intr1:ident], $base:ty, [$ty1:ty], $n:expr)
+         => |$arr:ident| $extract:expr) => {
+            #[test]
+            #[cfg(target_feature = "neon")]
+            $(#[$attr])*
+            fn $test1() {
+                fn assert_chunks(val: $ty1, expected: [$base; $n]) {
+                    const S: usize = size_of::<$ty1>() / size_of::<$base>();
+                    const V: usize = S / $n;
+
+                    // Transmute between vector register and its array representation.
+                    let val = unsafe { ::core::mem::transmute::<$ty1, [$base; S]>(val) };
+
+                    for (data, &expected) in val.chunks_exact(V).zip(&expected) {
+                        let expected: [$base; V] = [expected; V];
+                        assert_eq!(data, expected);
+                    }
+                }
+
+                #[target_feature(enable = "neon")]
+                fn test() {
+                    let $arr: [$base; $n] = core::array::from_fn(|i| 0x42 as $base + i as $base);
+                    let v = super::$intr1($extract);
+                    assert_chunks(v, $arr);
+                }
+
+                unsafe { test() }
+            }
+        };
+    }
+
+    // 8-byte vector variants of dup.
+
+    test_vldup!(
+        fn [test_vld1_dup_s8, test_vld2_dup_s8, test_vld3_dup_s8, test_vld4_dup_s8],
+           [vld1_dup_s8, vld2_dup_s8, vld3_dup_s8, vld4_dup_s8],
+           i8,
+           [arch::int8x8_t, arch::int8x8x2_t, arch::int8x8x3_t, arch::int8x8x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1_dup_u8, test_vld2_dup_u8, test_vld3_dup_u8, test_vld4_dup_u8],
+           [vld1_dup_u8, vld2_dup_u8, vld3_dup_u8, vld4_dup_u8],
+           u8,
+           [arch::uint8x8_t, arch::uint8x8x2_t, arch::uint8x8x3_t, arch::uint8x8x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1_dup_s16, test_vld2_dup_s16, test_vld3_dup_s16, test_vld4_dup_s16],
+           [vld1_dup_s16, vld2_dup_s16, vld3_dup_s16, vld4_dup_s16],
+           i16,
+           [arch::int16x4_t, arch::int16x4x2_t, arch::int16x4x3_t, arch::int16x4x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1_dup_u16, test_vld2_dup_u16, test_vld3_dup_u16, test_vld4_dup_u16],
+           [vld1_dup_u16, vld2_dup_u16, vld3_dup_u16, vld4_dup_u16],
+           u16,
+           [arch::uint16x4_t, arch::uint16x4x2_t, arch::uint16x4x3_t, arch::uint16x4x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1_dup_s32, test_vld2_dup_s32, test_vld3_dup_s32, test_vld4_dup_s32],
+           [vld1_dup_s32, vld2_dup_s32, vld3_dup_s32, vld4_dup_s32],
+           i32,
+           [arch::int32x2_t, arch::int32x2x2_t, arch::int32x2x3_t, arch::int32x2x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1_dup_u32, test_vld2_dup_u32, test_vld3_dup_u32, test_vld4_dup_u32],
+           [vld1_dup_u32, vld2_dup_u32, vld3_dup_u32, vld4_dup_u32],
+           u32,
+           [arch::uint32x2_t, arch::uint32x2x2_t, arch::uint32x2x3_t, arch::uint32x2x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1_dup_f32, test_vld2_dup_f32, test_vld3_dup_f32, test_vld4_dup_f32],
+           [vld1_dup_f32, vld2_dup_f32, vld3_dup_f32, vld4_dup_f32],
+           f32,
+           [arch::float32x2_t, arch::float32x2x2_t, arch::float32x2x3_t, arch::float32x2x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1_dup_s64, test_vld2_dup_s64, test_vld3_dup_s64, test_vld4_dup_s64],
+           [vld1_dup_s64, vld2_dup_s64, vld3_dup_s64, vld4_dup_s64],
+           i64,
+           [arch::int64x1_t, arch::int64x1x2_t, arch::int64x1x3_t, arch::int64x1x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1_dup_u64, test_vld2_dup_u64, test_vld3_dup_u64, test_vld4_dup_u64],
+           [vld1_dup_u64, vld2_dup_u64, vld3_dup_u64, vld4_dup_u64],
+           u64,
+           [arch::uint64x1_t, arch::uint64x1x2_t, arch::uint64x1x3_t, arch::uint64x1x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1_dup_f64, test_vld2_dup_f64, test_vld3_dup_f64, test_vld4_dup_f64],
+           [vld1_dup_f64, vld2_dup_f64, vld3_dup_f64, vld4_dup_f64],
+           f64,
+           [arch::float64x1_t, arch::float64x1x2_t, arch::float64x1x3_t, arch::float64x1x4_t]
+    );
+
+    // 16-byte vector variants of dup.
+
+    test_vldup!(
+        fn [test_vld1q_dup_s8, test_vld2q_dup_s8, test_vld3q_dup_s8, test_vld4q_dup_s8],
+           [vld1q_dup_s8, vld2q_dup_s8, vld3q_dup_s8, vld4q_dup_s8],
+           i8,
+           [arch::int8x16_t, arch::int8x16x2_t, arch::int8x16x3_t, arch::int8x16x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1q_dup_u8, test_vld2q_dup_u8, test_vld3q_dup_u8, test_vld4q_dup_u8],
+           [vld1q_dup_u8, vld2q_dup_u8, vld3q_dup_u8, vld4q_dup_u8],
+           u8,
+           [arch::uint8x16_t, arch::uint8x16x2_t, arch::uint8x16x3_t, arch::uint8x16x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1q_dup_s16, test_vld2q_dup_s16, test_vld3q_dup_s16, test_vld4q_dup_s16],
+           [vld1q_dup_s16, vld2q_dup_s16, vld3q_dup_s16, vld4q_dup_s16],
+           i16,
+           [arch::int16x8_t, arch::int16x8x2_t, arch::int16x8x3_t, arch::int16x8x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1q_dup_u16, test_vld2q_dup_u16, test_vld3q_dup_u16, test_vld4q_dup_u16],
+           [vld1q_dup_u16, vld2q_dup_u16, vld3q_dup_u16, vld4q_dup_u16],
+           u16,
+           [arch::uint16x8_t, arch::uint16x8x2_t, arch::uint16x8x3_t, arch::uint16x8x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1q_dup_s32, test_vld2q_dup_s32, test_vld3q_dup_s32, test_vld4q_dup_s32],
+           [vld1q_dup_s32, vld2q_dup_s32, vld3q_dup_s32, vld4q_dup_s32],
+           i32,
+           [arch::int32x4_t, arch::int32x4x2_t, arch::int32x4x3_t, arch::int32x4x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1q_dup_u32, test_vld2q_dup_u32, test_vld3q_dup_u32, test_vld4q_dup_u32],
+           [vld1q_dup_u32, vld2q_dup_u32, vld3q_dup_u32, vld4q_dup_u32],
+           u32,
+           [arch::uint32x4_t, arch::uint32x4x2_t, arch::uint32x4x3_t, arch::uint32x4x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1q_dup_f32, test_vld2q_dup_f32, test_vld3q_dup_f32, test_vld4q_dup_f32],
+           [vld1q_dup_f32, vld2q_dup_f32, vld3q_dup_f32, vld4q_dup_f32],
+           f32,
+           [arch::float32x4_t, arch::float32x4x2_t, arch::float32x4x3_t, arch::float32x4x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1q_dup_s64, test_vld2q_dup_s64, test_vld3q_dup_s64, test_vld4q_dup_s64],
+           [vld1q_dup_s64, vld2q_dup_s64, vld3q_dup_s64, vld4q_dup_s64],
+           i64,
+           [arch::int64x2_t, arch::int64x2x2_t, arch::int64x2x3_t, arch::int64x2x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1q_dup_u64, test_vld2q_dup_u64, test_vld3q_dup_u64, test_vld4q_dup_u64],
+           [vld1q_dup_u64, vld2q_dup_u64, vld3q_dup_u64, vld4q_dup_u64],
+           u64,
+           [arch::uint64x2_t, arch::uint64x2x2_t, arch::uint64x2x3_t, arch::uint64x2x4_t]
+    );
+
+    test_vldup!(
+        fn [test_vld1q_dup_f64, test_vld2q_dup_f64, test_vld3q_dup_f64, test_vld4q_dup_f64],
+           [vld1q_dup_f64, vld2q_dup_f64, vld3q_dup_f64, vld4q_dup_f64],
+           f64,
+           [arch::float64x2_t, arch::float64x2x2_t, arch::float64x2x3_t, arch::float64x2x4_t]
+    );
 }
