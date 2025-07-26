@@ -55,9 +55,19 @@ jobs:
       - name: Doc tests (nightly feature)
         if: ${{ matrix.toolchain == 'nightly' }}
         run: cargo test --no-default-features --doc --features nightly
-      - name: Build docs (nightly)
+      - name: Build docs (nightly feature)
         if: ${{ matrix.toolchain == 'nightly' }}
         run: cargo doc --no-deps --no-default-features --features nightly
+
+        # Codegen tests
+      - name: Install LLVM and Clang
+        if: ${{ matrix.os == 'ubuntu' }}
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "20"
+      - name: FileCheck assembly tests
+        if: ${{ matrix.os == 'ubuntu' }}
+        run: cargo test --features assembly
 
   clippy-rustfmt:
     name: Clippy and rustfmt
