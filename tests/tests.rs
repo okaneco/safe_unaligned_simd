@@ -1,6 +1,6 @@
 #[allow(dead_code)]
 fn run_mode(mode: &'static str, custom_dir: Option<&'static str>) {
-    let mut config = compiletest_rs::Config::default();
+    let mut config = compiletest_rs::Config::default().tempdir();
     let cfg_mode = mode.parse().expect("Invalid mode");
 
     config.mode = cfg_mode;
