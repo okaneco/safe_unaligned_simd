@@ -1,9 +1,21 @@
-//! Platform-specific intrinsics for the aarch64 platform.
+//! Platform-specific intrinsics for the `aarch64` platform.
 //!
-//! Note that instructions are encoded with an optional `<align>` field which none of the intrinsics
-//! here set themselves. (It could hint alignment 64/128/256). The field is then 0b00 which is
+//! # Safety
 //!
-//! > Whenever `<align>` is omitted, the standard alignment is used, see Unaligned data access,
+//! Vectored store and load instructions are encoded with an optional `<align>` field which none of
+//! the intrinsics here set themselves. (It could hint alignment 64/128/256). The field is then the
+//! default for which [the Neon programmer's guide][neon-documentation] (not the most stable link)
+//! notes the following:
+//!
+//! <i>When the alignment is not specified in the instruction, the alignment restriction is
+//! controlled by the A bit \[of SCTLR\] \[… and\] if the A bit is 1, accesses must be element
+//! aligned.</i>
+//!
+//! [neon-documentation]: https://developer.arm.com/documentation/den0018/a/NEON-and-VFP-Instruction-Summary/NEON-load-and-store-instructions/VLDn--single-n-element-structure-to-all-lanes-?lang=en
+//!
+//! **Prior to version 20, llvm always inserted alignment assertions into the intrinsics. The crate
+//! is not sound prior to the bug fix (June 2025, rustc 1.88) with the LLVM backend. Other backends
+//! have not been verified.**
 //!
 //! You *could* use all these intrinsics with completely unaligned memory if you set SCTLR, the
 //! system control register, which is not part of the guarantees. So we do not allow those. To load
@@ -79,14 +91,14 @@ macro_rules! vld_n_replicate_k {
         $(#[$meta])*
         #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
         #[target_feature(enable = "neon")]
-        pub fn $intrinsic(into: &mut $realty, from: $ret) {
+        pub fn $intrinsic(into: &mut $realty, val: $ret) {
             $(
                 $size!($registers registers [[$base_ty; $n]; $registers] as $realty);
             )?
 
             // Safety: Review the macro use and macro construction. We match up types to the
             // intrinsics being used. Sizes are compile-time checked in test builds.
-            unsafe { arch::$intrinsic(::core::ptr::from_mut(into).cast(), from) }
+            unsafe { arch::$intrinsic(::core::ptr::from_mut(into).cast(), val) }
         }
     };
 }
@@ -989,6 +1001,7 @@ mod tests {
                 fn assert_chunks(val: $ty1, expected: [$base; $n]) {
                     const S: usize = size_of::<$ty1>() / size_of::<$base>();
                     const V: usize = S / $n;
+                    const _: () = assert!(V * $n == S);
 
                     // Transmute between vector register and its array representation.
                     let val = unsafe { ::core::mem::transmute::<$ty1, [$base; S]>(val) };

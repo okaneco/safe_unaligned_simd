@@ -16,6 +16,11 @@
 //! Currently, there is no plan to implement gather/scatter or masked load/store
 //! intrinsics for this platform.
 //!
+//! ### `aarch64`, `arm64ec`
+//! - `neon`
+//!
+//! Intrinsics that load / store individual lanes are not designed yet.
+//!
 //! ### Other platforms
 //!
 //! Not yet supported.
