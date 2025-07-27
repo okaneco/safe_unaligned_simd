@@ -351,11 +351,20 @@ mod tests {
     fn test_mm_loadu_si16_u16() {
         let a = [1];
         unsafe { test(&a) }
+        unsafe { test_scalar(&a[0]) }
 
         #[target_feature(enable = "sse2")]
         fn test(a: &[u16; 1]) {
             let r = super::_mm_loadu_si16(a);
             let target = arch::_mm_setr_epi16(a[0] as i16, 0, 0, 0, 0, 0, 0, 0);
+
+            assert_eq_m128i(r, target)
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar(a: &u16) {
+            let r = super::_mm_loadu_si16(a);
+            let target = arch::_mm_setr_epi16(*a as i16, 0, 0, 0, 0, 0, 0, 0);
 
             assert_eq_m128i(r, target)
         }
@@ -365,11 +374,20 @@ mod tests {
     fn test_mm_loadu_si16_i16() {
         let a = [-1];
         unsafe { test(&a) }
+        unsafe { test_scalar(&a[0]) }
 
         #[target_feature(enable = "sse2")]
         fn test(a: &[i16; 1]) {
             let r = super::_mm_loadu_si16(a);
             let target = arch::_mm_setr_epi16(a[0], 0, 0, 0, 0, 0, 0, 0);
+
+            assert_eq_m128i(r, target)
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar(a: &i16) {
+            let r = super::_mm_loadu_si16(a);
+            let target = arch::_mm_setr_epi16(*a, 0, 0, 0, 0, 0, 0, 0);
 
             assert_eq_m128i(r, target)
         }
@@ -450,11 +468,20 @@ mod tests {
     fn test_mm_loadu_si32_u32() {
         let a = [1];
         unsafe { test(&a) }
+        unsafe { test_scalar(&a[0]) }
 
         #[target_feature(enable = "sse2")]
         fn test(a: &[u32; 1]) {
             let r = super::_mm_loadu_si32(a);
             let target = arch::_mm_setr_epi32(a[0] as i32, 0, 0, 0);
+
+            assert_eq_m128i(r, target)
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar(a: &u32) {
+            let r = super::_mm_loadu_si32(a);
+            let target = arch::_mm_setr_epi32(*a as i32, 0, 0, 0);
 
             assert_eq_m128i(r, target)
         }
@@ -464,11 +491,20 @@ mod tests {
     fn test_mm_loadu_si32_i32() {
         let a = [-1];
         unsafe { test(&a) }
+        unsafe { test_scalar(&a[0]) }
 
         #[target_feature(enable = "sse2")]
         fn test(a: &[i32; 1]) {
             let r = super::_mm_loadu_si32(a);
             let target = arch::_mm_setr_epi32(a[0], 0, 0, 0);
+
+            assert_eq_m128i(r, target)
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar(a: &i32) {
+            let r = super::_mm_loadu_si32(a);
+            let target = arch::_mm_setr_epi32(*a, 0, 0, 0);
 
             assert_eq_m128i(r, target)
         }
@@ -608,11 +644,20 @@ mod tests {
     fn test_mm_loadu_si64_u64() {
         let a = [1];
         unsafe { test(&a) }
+        unsafe { test_scalar(&a[0]) }
 
         #[target_feature(enable = "sse2")]
         fn test(a: &[u64; 1]) {
             let r = super::_mm_loadu_si64(a);
             let target = arch::_mm_set_epi64x(0, a[0] as i64);
+
+            assert_eq_m128i(r, target)
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar(a: &u64) {
+            let r = super::_mm_loadu_si64(a);
+            let target = arch::_mm_set_epi64x(0, *a as i64);
 
             assert_eq_m128i(r, target)
         }
@@ -622,11 +667,20 @@ mod tests {
     fn test_mm_loadu_si64_i64() {
         let a = [-1];
         unsafe { test(&a) }
+        unsafe { test_scalar(&a[0]) }
 
         #[target_feature(enable = "sse2")]
         fn test(a: &[i64; 1]) {
             let r = super::_mm_loadu_si64(a);
             let target = arch::_mm_set_epi64x(0, a[0]);
+
+            assert_eq_m128i(r, target)
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar(a: &i64) {
+            let r = super::_mm_loadu_si64(a);
+            let target = arch::_mm_set_epi64x(0, *a);
 
             assert_eq_m128i(r, target)
         }
@@ -735,6 +789,7 @@ mod tests {
     #[test]
     fn test_mm_storeu_si16_u16() {
         unsafe { test() }
+        unsafe { test_scalar() }
 
         #[target_feature(enable = "sse2")]
         fn test() {
@@ -744,11 +799,21 @@ mod tests {
 
             assert_eq!(x, [1]);
         }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar() {
+            let a = arch::_mm_setr_epi16(1, 2, 3, 4, 5, 6, 7, 8);
+            let mut x = 0u16;
+            super::_mm_storeu_si16(&mut x, a);
+
+            assert_eq!(x, 1);
+        }
     }
 
     #[test]
     fn test_mm_storeu_si16_i16() {
         unsafe { test() }
+        unsafe { test_scalar() }
 
         #[target_feature(enable = "sse2")]
         fn test() {
@@ -757,6 +822,15 @@ mod tests {
             super::_mm_storeu_si16(&mut x, a);
 
             assert_eq!(x, [-1]);
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar() {
+            let a = arch::_mm_setr_epi16(-1, -2, -3, -4, -5, -6, -7, -8);
+            let mut x = 0i16;
+            super::_mm_storeu_si16(&mut x, a);
+
+            assert_eq!(x, -1);
         }
     }
 
@@ -821,6 +895,7 @@ mod tests {
     #[test]
     fn test_mm_storeu_si32_u32() {
         unsafe { test() }
+        unsafe { test_scalar() }
 
         #[target_feature(enable = "sse2")]
         fn test() {
@@ -830,11 +905,21 @@ mod tests {
 
             assert_eq!(x, [1]);
         }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar() {
+            let a = arch::_mm_setr_epi32(1, 2, 3, 4);
+            let mut x = 0u32;
+            super::_mm_storeu_si32(&mut x, a);
+
+            assert_eq!(x, 1);
+        }
     }
 
     #[test]
     fn test_mm_storeu_si32_i32() {
         unsafe { test() }
+        unsafe { test_scalar() }
 
         #[target_feature(enable = "sse2")]
         fn test() {
@@ -843,6 +928,15 @@ mod tests {
             super::_mm_storeu_si32(&mut x, a);
 
             assert_eq!(x, [-1]);
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar() {
+            let a = arch::_mm_setr_epi32(-1, -2, -3, -4);
+            let mut x = 0i32;
+            super::_mm_storeu_si32(&mut x, a);
+
+            assert_eq!(x, -1);
         }
     }
 
@@ -935,6 +1029,7 @@ mod tests {
     #[test]
     fn test_mm_storeu_si64_u64() {
         unsafe { test() }
+        unsafe { test_scalar() }
 
         #[target_feature(enable = "sse2")]
         fn test() {
@@ -944,11 +1039,21 @@ mod tests {
 
             assert_eq!(x, [1]);
         }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar() {
+            let a = arch::_mm_set_epi64x(2, 1);
+            let mut x = 0u64;
+            super::_mm_storeu_si64(&mut x, a);
+
+            assert_eq!(x, 1);
+        }
     }
 
     #[test]
     fn test_mm_storeu_si64_i64() {
         unsafe { test() }
+        unsafe { test_scalar() }
 
         #[target_feature(enable = "sse2")]
         fn test() {
@@ -957,6 +1062,15 @@ mod tests {
             super::_mm_storeu_si64(&mut x, a);
 
             assert_eq!(x, [-1]);
+        }
+
+        #[target_feature(enable = "sse2")]
+        fn test_scalar() {
+            let a = arch::_mm_set_epi64x(-2, -1);
+            let mut x = 0i64;
+            super::_mm_storeu_si64(&mut x, a);
+
+            assert_eq!(x, -1);
         }
     }
 

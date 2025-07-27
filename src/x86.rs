@@ -28,62 +28,66 @@ mod private {
 /// A trait that marks a type as valid for unaligned operations as an `i16`.
 pub trait Is16BitsUnaligned: private::Sealed {}
 
-macro_rules! impl_16_bits_traits {
-    ([$array_type:ty; $array_len:literal] => $storage:ty ) => {
-        const _: () =
-            const { assert!((size_of::<[$array_type; $array_len]>()) == size_of::<$storage>()) };
+macro_rules! impl_N_bits_traits {
+    (
+        impl $trait:path [$target:ty] for {
+            $($source:ty,)*
+        }
+    ) => {
+        $(
+            const _: () =
+                const { assert!(size_of::<$source>() == size_of::<$target>()) };
 
-        impl private::Sealed for [$array_type; $array_len] {}
-        impl Is16BitsUnaligned for [$array_type; $array_len] {}
+            impl private::Sealed for $source {}
+            impl $trait for $source {}
+        )*
     };
 }
 
-impl_16_bits_traits!([u8; 2] => i16);
-impl_16_bits_traits!([i8; 2] => i16);
-impl_16_bits_traits!([u16; 1] => i16);
-impl_16_bits_traits!([i16; 1] => i16);
+impl_N_bits_traits! {
+    impl Is16BitsUnaligned [i16] for {
+        [u8; 2],
+        [i8; 2],
+        [u16; 1],
+        [i16; 1],
+        u16,
+        i16,
+    }
+}
+
+impl_N_bits_traits! {
+    impl Is32BitsUnaligned [i32] for {
+        [u8; 4],
+        [i8; 4],
+        [u16; 2],
+        [i16; 2],
+        [u32; 1],
+        [i32; 1],
+        u32,
+        i32,
+    }
+}
+
+impl_N_bits_traits! {
+    impl Is64BitsUnaligned [i64] for {
+        [u8; 8],
+        [i8; 8],
+        [u16; 4],
+        [i16; 4],
+        [u32; 2],
+        [i32; 2],
+        [u64; 1],
+        [i64; 1],
+        u64,
+        i64,
+    }
+}
 
 /// A trait that marks a type as valid for unaligned operations as an `i32`.
 pub trait Is32BitsUnaligned: private::Sealed {}
 
-macro_rules! impl_32_bits_traits {
-    ([$array_type:ty; $array_len:literal] => $storage:ty ) => {
-        const _: () =
-            const { assert!((size_of::<[$array_type; $array_len]>()) == size_of::<$storage>()) };
-
-        impl private::Sealed for [$array_type; $array_len] {}
-        impl Is32BitsUnaligned for [$array_type; $array_len] {}
-    };
-}
-
-impl_32_bits_traits!([u8; 4] => i32);
-impl_32_bits_traits!([i8; 4] => i32);
-impl_32_bits_traits!([u16; 2] => i32);
-impl_32_bits_traits!([i16; 2] => i32);
-impl_32_bits_traits!([u32; 1] => i32);
-impl_32_bits_traits!([i32; 1] => i32);
-
 /// A trait that marks a type as valid for unaligned operations as an `i64`.
 pub trait Is64BitsUnaligned: private::Sealed {}
-
-macro_rules! impl_64_bits_traits {
-    ([$array_type:ty; $array_len:literal] => $storage:ty ) => {
-        const _: () =
-            const { assert!((size_of::<[$array_type; $array_len]>()) == size_of::<$storage>()) };
-
-        impl private::Sealed for [$array_type; $array_len] {}
-        impl Is64BitsUnaligned for [$array_type; $array_len] {}
-    };
-}
-
-impl_64_bits_traits!([u8; 8] => i64);
-impl_64_bits_traits!([i8; 8] => i64);
-impl_64_bits_traits!([u16; 4] => i64);
-impl_64_bits_traits!([i16; 4] => i64);
-impl_64_bits_traits!([u32; 2] => i64);
-impl_64_bits_traits!([i32; 2] => i64);
-impl_64_bits_traits!([u64; 1] => i64);
-impl_64_bits_traits!([i64; 1] => i64);
 
 /// A trait that marks a type as valid for unaligned operations as [`__m128i`],
 /// an x86-specific 128-bit integer vector type.
