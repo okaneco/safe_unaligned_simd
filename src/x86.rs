@@ -25,13 +25,13 @@ mod private {
     pub trait Sealed {}
 }
 
-/// A trait that marks a type as valid for unaligned operations as an `i16`.
+/// A trait that marks a type as valid for unaligned operations as an [`i16`].
 pub trait Is16BitsUnaligned: private::Sealed {}
 
-/// A trait that marks a type as valid for unaligned operations as an `i32`.
+/// A trait that marks a type as valid for unaligned operations as an [`i32`].
 pub trait Is32BitsUnaligned: private::Sealed {}
 
-/// A trait that marks a type as valid for unaligned operations as an `i64`.
+/// A trait that marks a type as valid for unaligned operations as an [`i64`].
 pub trait Is64BitsUnaligned: private::Sealed {}
 
 /// A trait that marks a type as valid for unaligned operations as [`__m128i`],
@@ -42,12 +42,48 @@ pub trait Is128BitsUnaligned: private::Sealed {}
 /// an x86-specific 256-bit integer vector type.
 pub trait Is256BitsUnaligned: private::Sealed {}
 
-///////////////////////////////////////////
-// Start of `Cell` trait implementations //
-///////////////////////////////////////////
+////////////////////////////
+// Start of `Cell` traits //
+////////////////////////////
 
 impl<T, const N: usize> private::Sealed for [core::cell::Cell<T>; N] where [T; N]: private::Sealed {}
 impl<T, const N: usize> private::Sealed for core::cell::Cell<[T; N]> where [T; N]: private::Sealed {}
+
+/// Marks a cell-like type as valid for unaligned operations as [`i16`].
+pub trait Is16CellUnaligned: private::Sealed {}
+
+impl<T, const N: usize> Is16CellUnaligned for [core::cell::Cell<T>; N] where
+    [T; N]: Is16BitsUnaligned
+{
+}
+impl<T, const N: usize> Is16CellUnaligned for core::cell::Cell<[T; N]> where
+    [T; N]: Is16BitsUnaligned
+{
+}
+
+/// Marks a cell-like type as valid for unaligned operations as [`i32`].
+pub trait Is32CellUnaligned: private::Sealed {}
+
+impl<T, const N: usize> Is32CellUnaligned for [core::cell::Cell<T>; N] where
+    [T; N]: Is32BitsUnaligned
+{
+}
+impl<T, const N: usize> Is32CellUnaligned for core::cell::Cell<[T; N]> where
+    [T; N]: Is32BitsUnaligned
+{
+}
+
+/// Marks a cell-like type as valid for unaligned operations as [`i64`].
+pub trait Is64CellUnaligned: private::Sealed {}
+
+impl<T, const N: usize> Is64CellUnaligned for [core::cell::Cell<T>; N] where
+    [T; N]: Is64BitsUnaligned
+{
+}
+impl<T, const N: usize> Is64CellUnaligned for core::cell::Cell<[T; N]> where
+    [T; N]: Is64BitsUnaligned
+{
+}
 
 /// Marks a cell-like type as valid for unaligned operations as [`__m128i`], an
 /// x86-specific 128-bit integer vector type, on shared references.
@@ -74,6 +110,10 @@ impl<T, const N: usize> Is256CellUnaligned for core::cell::Cell<[T; N]> where
     [T; N]: Is256BitsUnaligned
 {
 }
+
+///////////////////////////
+// Macro implementations //
+///////////////////////////
 
 macro_rules! impl_N_bits_traits {
     (
@@ -103,6 +143,13 @@ impl_N_bits_traits! {
 }
 
 impl_N_bits_traits! {
+    impl Is16CellUnaligned [i16] for {
+        core::cell::Cell<u16>,
+        core::cell::Cell<i16>,
+    }
+}
+
+impl_N_bits_traits! {
     impl Is32BitsUnaligned [i32] for {
         [u8; 4],
         [i8; 4],
@@ -112,6 +159,13 @@ impl_N_bits_traits! {
         [i32; 1],
         u32,
         i32,
+    }
+}
+
+impl_N_bits_traits! {
+    impl Is32CellUnaligned [i32] for {
+        core::cell::Cell<u32>,
+        core::cell::Cell<i32>,
     }
 }
 
@@ -127,6 +181,13 @@ impl_N_bits_traits! {
         [i64; 1],
         u64,
         i64,
+    }
+}
+
+impl_N_bits_traits! {
+    impl Is64CellUnaligned [i64] for {
+        core::cell::Cell<u64>,
+        core::cell::Cell<i64>,
     }
 }
 
