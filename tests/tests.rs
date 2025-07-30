@@ -1,3 +1,9 @@
+// Compiletest documentation:
+//
+// https://rustc-dev-guide.rust-lang.org/tests/compiletest.html
+// https://rustc-dev-guide.rust-lang.org/tests/directives.html#assembly
+// https://rustc-dev-guide.rust-lang.org/tests/ui.html#controlling-passfail-expectations
+
 #[allow(dead_code)]
 #[cfg_attr(miri, ignore)]
 fn run_mode(mode: &'static str, custom_dir: Option<&'static str>) {
@@ -13,13 +19,11 @@ fn run_mode(mode: &'static str, custom_dir: Option<&'static str>) {
     config.clean_rlib();
     config.strict_headers = true;
     config.llvm_filecheck = Some(
+        // Set your local path to `FileCheck` as this environment variable
+        // unless it's already present in $PATH from installing LLVM with
+        // `-DLLVM_INSTALL_UTILS=ON` in cmake.
         std::env::var("FILECHECK")
-            /* Comment out this line if using the following solutions */
-            .unwrap_or("llvmbuild/bin/FileCheck".to_string())
-            /* Uncomment out this line if using locally built LLVM */
-            // .unwrap_or("FileCheck".to_string())
-            /* Uncomment out this line if using `pip install filecheck`*/
-            // .unwrap_or("filecheck".to_string())
+            .unwrap_or("FileCheck".to_string())
             .into(),
     );
 

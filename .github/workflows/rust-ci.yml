@@ -120,17 +120,17 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
 
-      - name: Cache LLVM source and build folders
+      - name: Cache LLVM build/bin/ directory
         id: cache-llvm
         uses: actions/cache@v4
         with:
           path: |
-            ${{ github.workspace }}/llvm-project-llvmorg-20.1.8/
-            ${{ github.workspace }}/llvmbuild/
+            ${{ github.workspace }}/llvmbuild/bin/
           key: ${{ runner.os }}-llvm-20
 
       - name: Download LLVM and build FileCheck
-        if: steps.cache-llvm.outputs.cache-hit != 'true'
+        # FileCheck doesn't exist because the cache wasn't hit, rebuild it
+        if: ${{ hashFiles('llvmbuild/bin/FileCheck') == '' }}
         run: |
           # Prepare build environment
           sudo apt -y update
