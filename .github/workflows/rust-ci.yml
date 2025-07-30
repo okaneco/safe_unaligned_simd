@@ -106,6 +106,50 @@ jobs:
         run: cargo fmt -- --check
         continue-on-error: true
 
+  codegen-x86:
+    name: x86_64 assembly codegen tests
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu]
+        toolchain: [nightly]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+
+      - name: Cache LLVM source and build folders
+        id: cache-llvm
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/llvm-project-llvmorg-20.1.8/
+            ${{ github.workspace }}/llvmbuild/
+          key: ${{ runner.os }}-llvm-20
+
+      - name: Download LLVM and build FileCheck
+        if: steps.cache-llvm.outputs.cache-hit != 'true'
+        run: |
+          # Prepare build environment
+          sudo apt -y update
+          sudo apt -y install build-essential cmake xz-utils lsb-release wget software-properties-common
+          sudo apt -y autoremove
+          # Download LLVM source
+          wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-20.1.8.tar.gz
+          tar -xf llvmorg-20.1.8.tar.gz
+          # Configure the target and build folder, FileCheck requires enabling -DLLVM_INSTALL_UTILS=ON
+          mkdir llvmbuild
+          cmake -S ${{ github.workspace }}/llvm-project-llvmorg-20.1.8/llvm/ -B ${{ github.workspace }}/llvmbuild/ -DCMAKE_BUILD_TYPE=Release -DLLVM_INSTALL_UTILS=ON
+          cmake --build ${{ github.workspace }}/llvmbuild/ --target FileCheck
+
+      - name: Store FileCheck path in ENV variable
+        run: echo "FILECHECK=${{ github.workspace }}/llvmbuild/bin/FileCheck" >> $GITHUB_ENV
+
+      - name: Run assembly tests
+        run: cargo test --features _assembly_x86
+
   miri:
     name: Miri
     runs-on: ubuntu-latest

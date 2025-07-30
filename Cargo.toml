@@ -4,7 +4,7 @@ version = "0.2.0"
 edition = "2024"
 rust-version = "1.88"
 license = "MIT OR Apache-2.0"
-exclude = [".github", ""]
+exclude = [".github", "tests"]
 
 description = "Safe SIMD wrappers for unaligned load and store operations."
 homepage = "https://github.com/okaneco/safe_unaligned_simd"
@@ -18,6 +18,9 @@ categories = ["hardware-support", "api-bindings", "no-std"]
 
 [dev-dependencies]
 
+[dev-dependencies.compiletest_rs]
+version = "0.11.0"
+
 [features]
 default = []
 # Gain access to unstable features which require the nightly compiler
@@ -25,6 +28,8 @@ nightly = []
 
 # Internal feature for target-feature testing
 _avx_test = []
+# Internal feature for compiletest tests
+_assembly_x86 = []
 
 [package.metadata.docs.rs]
 no-default-features = true
