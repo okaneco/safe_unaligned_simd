@@ -14,7 +14,7 @@ env:
   RUSTDOCFLAGS: "-Dwarnings"
 jobs:
   build-x86:
-    name: Build and test crate/docs
+    name: Build and test crate
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
@@ -27,6 +27,11 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           components: rust-docs
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
 
         # Default build, no features
       - name: Build library
@@ -69,6 +74,11 @@ jobs:
           components: rust-docs
           targets: aarch64-apple-darwin
 
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
         # Default build, no features
       - name: Build library
         run: cargo build -v --lib --no-default-features --target aarch64-apple-darwin
@@ -99,12 +109,18 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
       - name: clippy
         run: cargo clippy
         continue-on-error: true
       - name: rustfmt
         run: cargo fmt -- --check
-        continue-on-error: true
+        continue-on-error: false
 
   codegen-x86:
     name: x86_64 assembly codegen tests
@@ -119,6 +135,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
 
       - name: Cache LLVM build/bin/ directory
         id: cache-llvm
@@ -156,14 +177,26 @@ jobs:
     needs: [build-x86, build-aarch64]
     steps:
       - uses: actions/checkout@v4
-      - name: Install Miri
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+          components: miri, rust-src
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
+      - name: Set up Miri
         run: |
-          rustup toolchain install nightly --component miri
           rustup override set nightly
           cargo miri setup
+
       - name: Test with Miri, Linux 64-bit x86_64 target
         run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx" cargo miri test --features _avx_test,nightly --target x86_64-unknown-linux-gnu
+
       - name: Test with Miri, Linux 32-bit x86 target
         run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx" cargo miri test --features _avx_test,nightly --target i686-unknown-linux-gnu
+
       - name: Test with Miri, Linux 64-bit aarch64 target
         run: RUSTFLAGS="-Dwarnings" cargo miri test --features nightly --all-features --target aarch64-unknown-linux-gnu
