@@ -14,7 +14,7 @@
 //! [neon-documentation]: https://developer.arm.com/documentation/den0018/a/NEON-and-VFP-Instruction-Summary/NEON-load-and-store-instructions/VLDn--single-n-element-structure-to-all-lanes-?lang=en
 //!
 //! **Prior to version 20, LLVM always inserted alignment assertions into the intrinsics. The crate
-//! is not sound  with the LLVM backend prior to the bug fix present in `rustc 1.88.0` (2025-06-23).
+//! is not sound with the LLVM backend prior to the bug fix present in `rustc 1.88.0` (2025-06-23).
 //! Other backends have not been verified.**
 //!
 //! You *could* use all of these intrinsics with completely unaligned memory if you set the SCTLR,
@@ -23,7 +23,6 @@
 //!
 //! See: <https://developer.arm.com/documentation/ddi0597/2025-06/SIMD-FP-Instructions/> on VLD1
 #![cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
-
 // Use all variants of registers.
 use core::arch::aarch64::{self as arch, *};
 

@@ -1,11 +1,11 @@
 //! Functions generic over [`Cell`][Cell] array types.
 //!
-//! These functions enable loading and storing of `&Cell[T; N]>` and
+//! These functions enable loading and storing of `&Cell<[T; N]>` and
 //! `&[Cell<T>; N]`, shared mutable container types which permit mutability
 //! even in the presence of aliasing.
 //!
-//! This allows for operating on overlapping slices similar to how one could use
-//! the `std::arch` intrinsics with raw pointers.
+//! This allows for operating on overlapping slices similar to how one can use
+//! `std::arch` intrinsics with raw pointers.
 //!
 //! [Cell]: core::cell::Cell
 //!
