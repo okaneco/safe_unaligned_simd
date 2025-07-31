@@ -9,9 +9,9 @@
 //! Platform-intrinsics that take raw pointers have been wrapped in functions
 //! that receive Rust reference types as arguments.
 //!
-//! ## Implemented Intrinsics
+//! ## Supported target architectures
 //!
-//! ### `x86`, `x86_64`
+//! ### `x86` / `x86_64`
 //! - `sse`, `sse2`, `avx`
 //!
 //! Some functions have variants that are generic over `Cell` array types,
@@ -24,10 +24,6 @@
 //! - `neon`
 //!
 //! Intrinsics that load / store individual lanes are not designed yet.
-//!
-//! ### Other platforms
-//!
-//! Not yet supported.
 #![forbid(missing_docs, non_ascii_idents)]
 #![cfg_attr(not(test), no_std)]
 

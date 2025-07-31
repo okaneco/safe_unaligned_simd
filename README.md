@@ -1,6 +1,6 @@
 # `safe_unaligned_simd`
 
-[![Build Status](https://github.com/okaneco/safe_unaligned_simd/workflows/Rust%20CI/badge.svg)](https://github.com/okaneco/safe_unaligned_simd)
+[![Build Status](https://github.com/okaneco/safe_unaligned_simd/actions/workflows/rust-ci.yml/badge.svg?branch=master)](https://github.com/okaneco/safe_unaligned_simd)
 [![Crates.io](https://img.shields.io/crates/v/safe_unaligned_simd.svg)](https://crates.io/crates/safe_unaligned_simd)
 [![Docs.rs](https://docs.rs/safe_unaligned_simd/badge.svg)](https://docs.rs/safe_unaligned_simd)
 
@@ -12,12 +12,13 @@ Platform-intrinsics that take raw pointers have been wrapped in functions that r
 
 **MSRV**: 1.88
 
-## Implemented Intrinsics
+## Supported target architectures
 
-### `x86`, `x86_64`
+### `x86` / `x86_64`
 - `sse`, `sse2`, `avx`
 
 Some functions have variants that are generic over `Cell` array types, which allow for mutation of shared references.
+See the [`cell`](./src/x86/cell.rs) module for an example.
 
 Some example function signatures:
 ```rust
@@ -41,10 +42,6 @@ fn vld2_dup_s8(from: &[i8; 2]) -> int8x8x2_t;
 #[target_feature(enable = "neon")]
 fn vst1q_f64(into: &mut [f64; 2], val: float64x2_t);
 ```
-
-### Other platforms
-
-Not yet supported.
 
 ## License
 This crate is licensed under either
