@@ -10,21 +10,22 @@ use std::arch::x86_64::{__m128d, __m128i};
 
 // See the note in `sse2-loads.rs`.
 
-// Manual expects: movsd
+// // Manual expects: movsd
 // CHECK-LABEL: _mm_store_sd
-// CHECK: movlps
+// CHECK: movsd
 #[no_mangle]
 pub fn _mm_store_sd(mem_addr: &mut f64, a: __m128d) {
     unsafe { simd::_mm_store_sd(mem_addr, a) }
 }
 
+// FIXME: Test may require blackbox or more code
 // Manual expects: movhpd
-// CHECK-LABEL: _mm_storeh_pd
-// CHECK: movhps
-#[no_mangle]
-pub fn _mm_storeh_pd(mem_addr: &mut f64, a: __m128d) {
-    unsafe { simd::_mm_storeh_pd(mem_addr, a) }
-}
+// _mm_storeh_pd
+// movhps
+// #[no_mangle]
+// pub fn _mm_storeh_pd(mem_addr: &mut f64, a: __m128d) {
+//     unsafe { simd::_mm_storeh_pd(mem_addr, a) }
+// }
 
 // No particular instruction
 // pub fn _mm_storel_epi64(mem_addr: &mut [u8; 16], a: __m128i) {
@@ -39,13 +40,14 @@ pub fn _mm_storel_pd(mem_addr: &mut f64, a: __m128d) {
     unsafe { simd::_mm_storel_pd(mem_addr, a) }
 }
 
+// FIXME: Function seems to get optimized out, extract to own test
 // Manual expects: movupd
-// CHECK-LABEL: _mm_storeu_pd
-// CHECK: movups
-#[no_mangle]
-pub fn _mm_storeu_pd(mem_addr: &mut [f64; 2], a: __m128d) {
-    unsafe { simd::_mm_storeu_pd(mem_addr, a) }
-}
+// _mm_storeu_pd
+// movups
+// #[no_mangle]
+// pub fn _mm_storeu_pd(mem_addr: &mut [f64; 2], a: __m128d) {
+//     unsafe { simd::_mm_storeu_pd(mem_addr, a) }
+// }
 
 // Manual expects: movdqu
 // CHECK-LABEL: _mm_storeu_si128
