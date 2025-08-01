@@ -9,6 +9,11 @@ on:
     - cron: "0 0 1 * *" # monthly
   workflow_dispatch: # allow manual triggering of the action
 
+# Cancel running jobs if branch is pushed to again
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   RUSTFLAGS: "-Dwarnings"
   RUSTDOCFLAGS: "-Dwarnings"
@@ -28,7 +33,16 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           components: rust-docs
 
+      - name: Cache Cargo Dependencies (ubuntu nightly)
+        # Share cache with Miri job
+        if: ${{ (matrix.os == 'ubuntu') && (matrix.toolchain == 'nightly') }}
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          shared-key: "linux-nightly"
+
       - name: Cache Cargo Dependencies
+        if: ${{ !((matrix.os == 'ubuntu') && (matrix.toolchain == 'nightly')) }}
         uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
@@ -60,11 +74,11 @@ jobs:
 
   build-aarch64:
     name: Build and test crate
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos]
+        os: [macos-latest, ubuntu-24.04-arm, windows-11-arm]
         toolchain: ["1.88", nightly, beta, stable]
     steps:
       - uses: actions/checkout@v4
@@ -81,13 +95,13 @@ jobs:
 
         # Default build, no features
       - name: Build library
-        run: cargo build -v --lib --no-default-features --target aarch64-apple-darwin
+        run: cargo build -v --lib --no-default-features
       - name: Test library
-        run: cargo test --no-default-features --lib --target aarch64-apple-darwin
+        run: cargo test --no-default-features --lib
       - name: Doc tests
-        run: cargo test --no-default-features --doc --target aarch64-apple-darwin
+        run: cargo test --no-default-features --doc
       - name: Build docs
-        run: cargo doc --no-deps --no-default-features --target aarch64-apple-darwin
+        run: cargo doc --no-deps --no-default-features
 
         # Nightly feature tests
       - name: Test library (nightly feature)
@@ -186,6 +200,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
+          shared-key: "linux-nightly"
 
       - name: Set up Miri
         run: |
