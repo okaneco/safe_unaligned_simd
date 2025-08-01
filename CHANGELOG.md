@@ -1,5 +1,10 @@
 # `safe_unaligned_simd` changelog
 
+## Version 0.2.1 - 2025-07
+
+No functional change.  
+Patch release so docs.rs build defaults to `x86_64-unknown-linux-gnu` target.
+
 ## Version 0.2.0 - 2025-07
 
 Version bump for changing the signature of some `sse2` functions.
