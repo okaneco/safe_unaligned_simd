@@ -1,3 +1,11 @@
+//! Module for traits common to SIMD intrinsic implementations.
+//!
+//! Some platforms, such as x86 and wasm32, have "bag of bits" vector register
+//! types which can internally represent various types of packed integer arrays.
+//!
+//! These traits provide abstractions over the bit-width that these vector
+//! types' load and store intrinsics operate on.
+
 // Internal module for sealing SIMD traits.
 mod private {
     pub trait Sealed {}
@@ -12,12 +20,17 @@ pub trait Is32BitsUnaligned: private::Sealed {}
 /// A trait that marks a type as valid for unaligned operations as an [`i64`].
 pub trait Is64BitsUnaligned: private::Sealed {}
 
-/// A trait that marks a type as valid for unaligned operations as [`__m128i`],
-/// an x86-specific 128-bit integer vector type.
+/// A trait that marks a type as valid for unaligned operations as a 128-bit
+/// integer vector type such as [`__m128i`][x86] or [`v128`][wasm32].
+///
+/// [x86]: https://doc.rust-lang.org/stable/core/arch/x86/struct.__m128i.html
+/// [wasm32]: https://doc.rust-lang.org/stable/core/arch/wasm32/struct.v128.html
 pub trait Is128BitsUnaligned: private::Sealed {}
 
-/// A trait that marks a type as valid for unaligned operations as [`__m256i`],
-/// an x86-specific 256-bit integer vector type.
+/// A trait that marks a type as valid for unaligned operations as a 256-bit
+/// integer vector type such as [`__m256i`][x86].
+///
+/// [x86]: https://doc.rust-lang.org/stable/core/arch/x86/struct.__m256i.html
 pub trait Is256BitsUnaligned: private::Sealed {}
 
 ////////////////////////////
@@ -27,7 +40,8 @@ pub trait Is256BitsUnaligned: private::Sealed {}
 impl<T, const N: usize> private::Sealed for [core::cell::Cell<T>; N] where [T; N]: private::Sealed {}
 impl<T, const N: usize> private::Sealed for core::cell::Cell<[T; N]> where [T; N]: private::Sealed {}
 
-/// Marks a cell-like type as valid for unaligned operations as [`i16`].
+/// A trait that marks a cell-like type as valid for unaligned operations as an
+/// [`i16`].
 pub trait Is16CellUnaligned: private::Sealed {}
 
 impl<T, const N: usize> Is16CellUnaligned for [core::cell::Cell<T>; N] where
@@ -39,7 +53,8 @@ impl<T, const N: usize> Is16CellUnaligned for core::cell::Cell<[T; N]> where
 {
 }
 
-/// Marks a cell-like type as valid for unaligned operations as [`i32`].
+/// A trait that marks a cell-like type as valid for unaligned operations as an
+/// [`i32`].
 pub trait Is32CellUnaligned: private::Sealed {}
 
 impl<T, const N: usize> Is32CellUnaligned for [core::cell::Cell<T>; N] where
@@ -51,7 +66,8 @@ impl<T, const N: usize> Is32CellUnaligned for core::cell::Cell<[T; N]> where
 {
 }
 
-/// Marks a cell-like type as valid for unaligned operations as [`i64`].
+/// A trait that marks a cell-like type as valid for unaligned operations as an
+/// [`i64`].
 pub trait Is64CellUnaligned: private::Sealed {}
 
 impl<T, const N: usize> Is64CellUnaligned for [core::cell::Cell<T>; N] where
@@ -63,8 +79,11 @@ impl<T, const N: usize> Is64CellUnaligned for core::cell::Cell<[T; N]> where
 {
 }
 
-/// Marks a cell-like type as valid for unaligned operations as [`__m128i`], an
-/// x86-specific 128-bit integer vector type, on shared references.
+/// A trait that marks a cell-like type as valid for unaligned operations as a
+/// 128-bit integer vector type such as [`__m128i`][x86] or [`v128`][wasm32].
+///
+/// [x86]: https://doc.rust-lang.org/stable/core/arch/x86/struct.__m128i.html
+/// [wasm32]: https://doc.rust-lang.org/stable/core/arch/wasm32/struct.v128.html
 pub trait Is128CellUnaligned: private::Sealed {}
 
 impl<T, const N: usize> Is128CellUnaligned for [core::cell::Cell<T>; N] where
@@ -76,8 +95,10 @@ impl<T, const N: usize> Is128CellUnaligned for core::cell::Cell<[T; N]> where
 {
 }
 
-/// Marks a cell-like type as valid for unaligned operations as [`__m256i`], an
-/// x86-specific 256-bit integer vector type, on shared references.
+/// A trait that marks a cell-like type as valid for unaligned operations as a
+/// 256-bit integer vector type such as [`__m256i`][x86].
+///
+/// [x86]: https://doc.rust-lang.org/stable/core/arch/x86/struct.__m256i.html
 pub trait Is256CellUnaligned: private::Sealed {}
 
 impl<T, const N: usize> Is256CellUnaligned for [core::cell::Cell<T>; N] where
@@ -88,10 +109,6 @@ impl<T, const N: usize> Is256CellUnaligned for core::cell::Cell<[T; N]> where
     [T; N]: Is256BitsUnaligned
 {
 }
-
-///////////////////////////
-// Macro implementations //
-///////////////////////////
 
 macro_rules! impl_N_bits_traits {
     (
@@ -170,7 +187,7 @@ impl_N_bits_traits! {
 }
 
 impl_N_bits_traits! {
-    impl Is128BitsUnaligned [__m128i] for {
+    impl Is128BitsUnaligned [i128] for {
         [u8; 16],
         [i8; 16],
         [u16; 8],
@@ -183,7 +200,7 @@ impl_N_bits_traits! {
 }
 
 impl_N_bits_traits! {
-    impl Is256BitsUnaligned [__m256i] for {
+    impl Is256BitsUnaligned [[i128; 2]] for {
         [u8; 32],
         [i8; 32],
         [u16; 16],
@@ -194,3 +211,15 @@ impl_N_bits_traits! {
         [i64; 4],
     }
 }
+
+#[cfg(target_arch = "x86")]
+use core::arch::x86::{__m128i, __m256i};
+#[cfg(target_arch = "x86_64")]
+use core::arch::x86_64::{__m128i, __m256i};
+
+// Sanity check:
+// We define the 128/256-bit unaligned trait types in terms of `i128`.
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+const _: () = assert!(size_of::<i128>() == size_of::<__m128i>());
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+const _: () = assert!(size_of::<[i128; 2]>() == size_of::<__m256i>());
