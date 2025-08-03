@@ -27,6 +27,8 @@
 #![forbid(missing_docs, non_ascii_idents)]
 #![cfg_attr(not(test), no_std)]
 
+mod traits;
+
 #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
 pub mod aarch64;
 
