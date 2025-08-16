@@ -33,6 +33,9 @@ mod common_traits;
 #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
 pub mod aarch64;
 
+#[cfg(target_arch = "wasm32")]
+pub mod wasm32;
+
 #[cfg(target_arch = "x86")]
 pub mod x86;
 
