@@ -5,6 +5,10 @@
 //!
 //! These traits provide abstractions over the bit-width that these vector
 //! types' load and store intrinsics operate on.
+// Different targets require different widths and enabling them at a type level dependent on the OS
+// adds a lot of annotations that must all be tested in every combination. They are a property of
+// the types, after all. Still we have some types that are only available per platform.
+#![allow(unused)]
 
 // Internal module for sealing SIMD traits.
 mod private {
@@ -230,6 +234,12 @@ impl_N_bits_traits! {
         [i64; 2],
         [f64; 2],
         #[cfg(target_arch = "wasm32")] core::arch::wasm32::v128,
+        #[cfg(target_arch = "x86")] core::arch::x86::__m128,
+        #[cfg(target_arch = "x86")] core::arch::x86::__m128d,
+        #[cfg(target_arch = "x86")] core::arch::x86::__m128i,
+        #[cfg(target_arch = "x86_64")] core::arch::x86_64::__m128,
+        #[cfg(target_arch = "x86_64")] core::arch::x86_64::__m128d,
+        #[cfg(target_arch = "x86_64")] core::arch::x86_64::__m128i,
     }
 }
 
@@ -245,7 +255,18 @@ impl_N_bits_traits! {
         [u64; 4],
         [i64; 4],
         [f64; 4],
-        #[cfg(target_arch = "wasm32")] [core::arch::wasm32::v128; 2],
+        #[cfg(target_arch = "x86")] [core::arch::x86::__m128; 2],
+        #[cfg(target_arch = "x86")] [core::arch::x86::__m128d; 2],
+        #[cfg(target_arch = "x86")] [core::arch::x86::__m128i; 2],
+        #[cfg(target_arch = "x86_64")] [core::arch::x86_64::__m128; 2],
+        #[cfg(target_arch = "x86_64")] [core::arch::x86_64::__m128d; 2],
+        #[cfg(target_arch = "x86_64")] [core::arch::x86_64::__m128i; 2],
+        #[cfg(target_arch = "x86")] core::arch::x86::__m256,
+        #[cfg(target_arch = "x86")] core::arch::x86::__m256d,
+        #[cfg(target_arch = "x86")] core::arch::x86::__m256i,
+        #[cfg(target_arch = "x86_64")] core::arch::x86_64::__m256,
+        #[cfg(target_arch = "x86_64")] core::arch::x86_64::__m256d,
+        #[cfg(target_arch = "x86_64")] core::arch::x86_64::__m256i,
     }
 }
 
