@@ -264,8 +264,6 @@ mod tests {
             unsafe { core::mem::transmute::<_, [u8; 16]>(val) },
             unsafe { core::slice::from_raw_parts(data.as_ptr() as *const u8, data.len() * N) }
         );
-
-        // assert_eq!(arch::to_bytes(val), <[u8; N]>::flat(data))
     }
 
     #[test]
