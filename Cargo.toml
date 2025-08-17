@@ -18,7 +18,11 @@ categories = ["hardware-support", "api-bindings", "no-std"]
 
 [dev-dependencies]
 
-[dev-dependencies.compiletest_rs]
+[target.'cfg(not(target_os = "wasi"))'.dev-dependencies.compiletest_rs]
+# This only supports windows and unix types with native code. On other targets
+# it uses a fallback that unfortunately assumes that `&ChildStdout` is also
+# Read. On `wasi` this is not the case, leading to compile error.
+# Upstream issue: https://github.com/Manishearth/compiletest-rs/issues/291
 version = "0.11.0"
 
 [features]

@@ -3,6 +3,7 @@
 // https://rustc-dev-guide.rust-lang.org/tests/compiletest.html
 // https://rustc-dev-guide.rust-lang.org/tests/directives.html#assembly
 // https://rustc-dev-guide.rust-lang.org/tests/ui.html#controlling-passfail-expectations
+#![cfg(not(target_os = "wasi"))]
 
 #[allow(dead_code)]
 #[cfg_attr(miri, ignore)]
