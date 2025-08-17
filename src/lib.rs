@@ -27,11 +27,14 @@
 #![forbid(missing_docs, non_ascii_idents)]
 #![cfg_attr(not(test), no_std)]
 
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "wasm32",))]
 mod common_traits;
 
 #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
 pub mod aarch64;
+
+#[cfg(target_arch = "wasm32")]
+pub mod wasm32;
 
 #[cfg(target_arch = "x86")]
 pub mod x86;

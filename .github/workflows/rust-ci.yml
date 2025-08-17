@@ -114,6 +114,51 @@ jobs:
         if: ${{ matrix.toolchain == 'nightly' }}
         run: cargo doc --no-deps --no-default-features --features nightly
 
+  build-wasm32:
+    name: Build and test crate/docs
+    runs-on: ubuntu-latest
+    env:
+      # Installed later on ..
+      CARGO_TARGET_WASM32_WASIP1_RUNNER: "./wasmtime --dir .::"
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [1.88, nightly, beta, stable]
+        target: ["wasm32-wasip1"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: wasm32-wasip1
+          components: rust-docs
+      - run: >
+          curl -L https://github.com/bytecodealliance/wasmtime/releases/download/dev/wasmtime-dev-x86_64-linux.tar.xz | tar x --xz -f - --strip-components 1 "wasmtime-dev-x86_64-linux/wasmtime"
+      - name: "Enable simd128 target feature"
+        env:
+          RUSTFLAGS: "-Dwarnings -Ctarget-feature=+simd128"
+        run: |
+          echo "RUSTFLAGS=${{ env.RUSTFLAGS }}" >> $GITHUB_ENV
+      - name: Build library
+        run: cargo build -v --lib --no-default-features --target ${{ matrix.target }}
+      - name: Test library
+        run: cargo test --no-default-features --lib --target ${{ matrix.target }}
+      - name: Doc tests
+        run: cargo test --no-default-features --doc --target ${{ matrix.target }}
+      - name: Build docs
+        run: cargo doc --no-deps --no-default-features --target ${{ matrix.target }}
+
+        # Nightly feature tests
+      - name: Test library (nightly feature)
+        if: ${{ matrix.toolchain == 'nightly' }}
+        run: cargo test --no-default-features --lib --features nightly --target ${{ matrix.target }}
+      - name: Doc tests (nightly feature)
+        if: ${{ matrix.toolchain == 'nightly' }}
+        run: cargo test --no-default-features --doc --features nightly --target ${{ matrix.target }}
+      - name: Build docs (nightly)
+        if: ${{ matrix.toolchain == 'nightly' }}
+        run: cargo doc --no-deps --no-default-features --features nightly --target ${{ matrix.target }}
+
   clippy-rustfmt:
     name: Clippy and rustfmt
     runs-on: ubuntu-latest
@@ -218,3 +263,5 @@ jobs:
 
       - name: Test with Miri, Linux 64-bit aarch64 target
         run: RUSTFLAGS="-Dwarnings" cargo miri test --features nightly --all-features --target aarch64-unknown-linux-gnu
+
+      # FIXME: missing wasm32 target when support is available
