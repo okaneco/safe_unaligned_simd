@@ -11,6 +11,9 @@ mod private {
     pub trait Sealed {}
 }
 
+/// A trait that marks a type as valid for unaligned operations as an [`i8`].
+pub trait Is8BitsUnaligned: private::Sealed {}
+
 /// A trait that marks a type as valid for unaligned operations as an [`i16`].
 pub trait Is16BitsUnaligned: private::Sealed {}
 
@@ -39,6 +42,15 @@ pub trait Is256BitsUnaligned: private::Sealed {}
 
 impl<T, const N: usize> private::Sealed for [core::cell::Cell<T>; N] where [T; N]: private::Sealed {}
 impl<T, const N: usize> private::Sealed for core::cell::Cell<[T; N]> where [T; N]: private::Sealed {}
+
+/// A trait that marks a cell-like type as valid for unaligned operations as an
+/// [`i8`].
+pub trait Is8CellUnaligned: private::Sealed {}
+
+impl<T, const N: usize> Is8CellUnaligned for [core::cell::Cell<T>; N] where [T; N]: Is16BitsUnaligned
+{}
+impl<T, const N: usize> Is8CellUnaligned for core::cell::Cell<[T; N]> where [T; N]: Is16BitsUnaligned
+{}
 
 /// A trait that marks a cell-like type as valid for unaligned operations as an
 /// [`i16`].
@@ -113,17 +125,29 @@ impl<T, const N: usize> Is256CellUnaligned for core::cell::Cell<[T; N]> where
 macro_rules! impl_N_bits_traits {
     (
         impl $trait:path [$target:ty] for {
-            $($source:ty,)*
+            $($(#[$cfg_attr:meta])* $source:ty,)*
         }
     ) => {
         $(
+            $(#[$cfg_attr])*
             const _: () =
                 const { assert!(size_of::<$source>() == size_of::<$target>()) };
 
+            $(#[$cfg_attr])*
             impl private::Sealed for $source {}
+            $(#[$cfg_attr])*
             impl $trait for $source {}
         )*
     };
+}
+
+impl_N_bits_traits! {
+    impl Is8BitsUnaligned [i8] for {
+        [u8; 1],
+        [i8; 1],
+        u8,
+        i8,
+    }
 }
 
 impl_N_bits_traits! {
@@ -152,8 +176,10 @@ impl_N_bits_traits! {
         [i16; 2],
         [u32; 1],
         [i32; 1],
+        [f32; 1],
         u32,
         i32,
+        f32,
     }
 }
 
@@ -161,6 +187,7 @@ impl_N_bits_traits! {
     impl Is32CellUnaligned [i32] for {
         core::cell::Cell<u32>,
         core::cell::Cell<i32>,
+        core::cell::Cell<f32>,
     }
 }
 
@@ -172,10 +199,13 @@ impl_N_bits_traits! {
         [i16; 4],
         [u32; 2],
         [i32; 2],
+        [f32; 2],
         [u64; 1],
         [i64; 1],
+        [f64; 1],
         u64,
         i64,
+        f64,
     }
 }
 
@@ -183,6 +213,7 @@ impl_N_bits_traits! {
     impl Is64CellUnaligned [i64] for {
         core::cell::Cell<u64>,
         core::cell::Cell<i64>,
+        core::cell::Cell<f64>,
     }
 }
 
@@ -194,8 +225,11 @@ impl_N_bits_traits! {
         [i16; 8],
         [u32; 4],
         [i32; 4],
+        [f32; 4],
         [u64; 2],
         [i64; 2],
+        [f64; 2],
+        #[cfg(target_arch = "wasm32")] core::arch::wasm32::v128,
     }
 }
 
@@ -207,8 +241,11 @@ impl_N_bits_traits! {
         [i16; 16],
         [u32; 8],
         [i32; 8],
+        [f32; 8],
         [u64; 4],
         [i64; 4],
+        [f64; 4],
+        #[cfg(target_arch = "wasm32")] [core::arch::wasm32::v128; 2],
     }
 }
 
