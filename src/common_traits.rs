@@ -40,6 +40,12 @@ pub trait Is128BitsUnaligned: private::Sealed {}
 /// [x86]: https://doc.rust-lang.org/stable/core/arch/x86/struct.__m256i.html
 pub trait Is256BitsUnaligned: private::Sealed {}
 
+/// A trait that marks a type as valid for unaligned operations as a 512-bit
+/// integer vector type such as [`__m512i`][x86].
+///
+/// [x86]: https://doc.rust-lang.org/stable/core/arch/x86/struct.__m512i.html
+pub trait Is512BitsUnaligned: private::Sealed {}
+
 ////////////////////////////
 // Start of `Cell` traits //
 ////////////////////////////
@@ -270,10 +276,43 @@ impl_N_bits_traits! {
     }
 }
 
+impl_N_bits_traits! {
+    impl Is512BitsUnaligned [[i128; 4]] for {
+        [u8; 64],
+        [i8; 64],
+        [u16; 32],
+        [i16; 32],
+        [u32; 16],
+        [i32; 16],
+        [f32; 16],
+        [u64; 8],
+        [i64; 8],
+        [f64; 8],
+        #[cfg(target_arch = "x86")] [core::arch::x86::__m128; 4],
+        #[cfg(target_arch = "x86")] [core::arch::x86::__m128d; 4],
+        #[cfg(target_arch = "x86")] [core::arch::x86::__m128i; 4],
+        #[cfg(target_arch = "x86_64")] [core::arch::x86_64::__m128; 4],
+        #[cfg(target_arch = "x86_64")] [core::arch::x86_64::__m128d; 4],
+        #[cfg(target_arch = "x86_64")] [core::arch::x86_64::__m128i; 4],
+        #[cfg(target_arch = "x86")] [core::arch::x86::__m256; 2],
+        #[cfg(target_arch = "x86")] [core::arch::x86::__m256d; 2],
+        #[cfg(target_arch = "x86")] [core::arch::x86::__m256i; 2],
+        #[cfg(target_arch = "x86_64")] [core::arch::x86_64::__m256; 2],
+        #[cfg(target_arch = "x86_64")] [core::arch::x86_64::__m256d; 2],
+        #[cfg(target_arch = "x86_64")] [core::arch::x86_64::__m256i; 2],
+        #[cfg(target_arch = "x86")] core::arch::x86::__m512,
+        #[cfg(target_arch = "x86")] core::arch::x86::__m512d,
+        #[cfg(target_arch = "x86")] core::arch::x86::__m512i,
+        #[cfg(target_arch = "x86_64")] core::arch::x86_64::__m512,
+        #[cfg(target_arch = "x86_64")] core::arch::x86_64::__m512d,
+        #[cfg(target_arch = "x86_64")] core::arch::x86_64::__m512i,
+    }
+}
+
 #[cfg(target_arch = "x86")]
-use core::arch::x86::{__m128i, __m256i};
+use core::arch::x86::{__m128i, __m256i, __m512i};
 #[cfg(target_arch = "x86_64")]
-use core::arch::x86_64::{__m128i, __m256i};
+use core::arch::x86_64::{__m128i, __m256i, __m512i};
 
 // Sanity check:
 // We define the 128/256-bit unaligned trait types in terms of `i128`.
@@ -281,3 +320,5 @@ use core::arch::x86_64::{__m128i, __m256i};
 const _: () = assert!(size_of::<i128>() == size_of::<__m128i>());
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 const _: () = assert!(size_of::<[i128; 2]>() == size_of::<__m256i>());
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+const _: () = assert!(size_of::<[i128; 4]>() == size_of::<__m512i>());

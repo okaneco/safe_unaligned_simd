@@ -27,6 +27,8 @@ version = "0.11.0"
 
 [features]
 default = []
+# Enables the AVX512F, "Foundation", instruction set
+avx512f = []
 # Gain access to unstable features which require the nightly compiler
 nightly = []
 

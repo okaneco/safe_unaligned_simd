@@ -61,15 +61,37 @@ jobs:
       - name: Test library (avx feature)
         run: cargo test --no-default-features --lib --features _avx_test
 
+        # Check if AVX512F/VL target features are supported (VL requires F)
+      - name: Check supported native target features (AVX512F feature)
+        if: ${{ (matrix.os == 'ubuntu') }}
+        id: avx512f_check
+        run: |
+          if rustc --print=cfg -Ctarget-cpu=native | grep -l 'avx512vl'; then
+            echo "PRESENT=yes" >> $GITHUB_OUTPUT
+          else
+            echo "PRESENT=no" >> $GITHUB_OUTPUT
+          fi
+
+        # AVX512F feature tests, AVX512 was stabilized in 1.89s
+      - name: Test library (AVX512F feature)
+        if: ${{ (matrix.toolchain != '1.88') && (matrix.os == 'ubuntu') && (steps.avx512f_check.PRESENT == 'yes') }}
+        run: cargo test --no-default-features --lib --features avx512
+      - name: Doc tests (AVX512F feature)
+        if: ${{ (matrix.toolchain != '1.88') && (matrix.os == 'ubuntu') && (steps.avx512f_check.PRESENT == 'yes') }}
+        run: cargo test --no-default-features --doc --features avx512
+      - name: Build docs (AVX512F feature)
+        if: ${{ (matrix.toolchain != '1.88') && (matrix.os == 'ubuntu') && (steps.avx512f_check.PRESENT == 'yes') }}
+        run: cargo doc --no-deps --no-default-features --features avx512
+
         # Nightly feature tests
       - name: Test library (nightly feature)
-        if: ${{ matrix.toolchain == 'nightly' }}
+        if: ${{ (matrix.toolchain == 'nightly') }}
         run: cargo test --no-default-features --lib --features nightly
       - name: Doc tests (nightly feature)
-        if: ${{ matrix.toolchain == 'nightly' }}
+        if: ${{ (matrix.toolchain == 'nightly') }}
         run: cargo test --no-default-features --doc --features nightly
       - name: Build docs (nightly feature)
-        if: ${{ matrix.toolchain == 'nightly' }}
+        if: ${{ (matrix.toolchain == 'nightly') }}
         run: cargo doc --no-deps --no-default-features --features nightly
 
   build-aarch64:
@@ -256,10 +278,10 @@ jobs:
           cargo miri setup
 
       - name: Test with Miri, Linux 64-bit x86_64 target
-        run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx" cargo miri test --features _avx_test,nightly --target x86_64-unknown-linux-gnu
+        run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx,+avx512f,+avx512vl" cargo miri test --features _avx_test,avx512 --target x86_64-unknown-linux-gnu
 
       - name: Test with Miri, Linux 32-bit x86 target
-        run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx" cargo miri test --features _avx_test,nightly --target i686-unknown-linux-gnu
+        run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx,+avx512f,+avx512vl" cargo miri test --features _avx_test,avx512 --target i686-unknown-linux-gnu
 
       - name: Test with Miri, Linux 64-bit aarch64 target
         run: RUSTFLAGS="-Dwarnings" cargo miri test --features nightly --all-features --target aarch64-unknown-linux-gnu
