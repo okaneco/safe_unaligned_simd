@@ -2,7 +2,7 @@
 use core::arch::wasm32::{self as arch, v128};
 use core::ptr;
 
-use crate::common_traits::{
+pub use crate::common_traits::{
     Is8BitsUnaligned as Is1ByteUnaligned, Is16BitsUnaligned as Is2BytesUnaligned,
     Is32BitsUnaligned as Is4BytesUnaligned, Is64BitsUnaligned as Is8BytesUnaligned,
     Is128BitsUnaligned as Is16BytesUnaligned,

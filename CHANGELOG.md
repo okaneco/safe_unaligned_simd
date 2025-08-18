@@ -1,5 +1,11 @@
 # `safe_unaligned_simd` changelog
 
+## Version 0.2.2-rc.1 - 2025-08
+
+Added support for `wasm32` intrinsics under the `simd128` target feature.
+
+- [`#12`][12] - Provide intrinsics for wasm32
+
 ## Version 0.2.1 - 2025-07
 
 No functional change.  
@@ -47,6 +53,7 @@ The functions are located within an architecture's `cell` module.
 
 Initial release
 
+[12]: https://github.com/okaneco/safe_unaligned_simd/pull/12
 [15]: https://github.com/okaneco/safe_unaligned_simd/pull/15
 [8]: https://github.com/okaneco/safe_unaligned_simd/pull/8
 [6]: https://github.com/okaneco/safe_unaligned_simd/pull/6
