@@ -8,102 +8,136 @@ pub use crate::common_traits::{
     Is128BitsUnaligned as Is16BytesUnaligned,
 };
 
+/// Loads eight 8-bit integers and sign extends each one to a 16-bit lane.
+///
 /// Safe wrapper around [`arch::i16x8_load_extend_i8x8`].
 #[target_feature(enable = "simd128")]
 pub fn i16x8_load_extend_i8x8<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::i16x8_load_extend_i8x8(ptr::from_ref(t).cast()) }
 }
 
+/// Loads eight 8-bit integers and zero extends each one to a 16-bit lane.
+///
 /// Safe wrapper around [`arch::i16x8_load_extend_u8x8`].
 #[target_feature(enable = "simd128")]
 pub fn i16x8_load_extend_u8x8<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::i16x8_load_extend_u8x8(ptr::from_ref(t).cast()) }
 }
 
+/// Loads four 16-bit integers and sign extends each one to a 32-bit lane.
+///
 /// Safe wrapper around [`arch::i32x4_load_extend_i16x4`].
 #[target_feature(enable = "simd128")]
 pub fn i32x4_load_extend_i16x4<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::i32x4_load_extend_i16x4(ptr::from_ref(t).cast()) }
 }
 
+/// Loads four 16-bit integers and zero extends each one to a 32-bit lane.
+///
 /// Safe wrapper around [`arch::i32x4_load_extend_u16x4`].
 #[target_feature(enable = "simd128")]
 pub fn i32x4_load_extend_u16x4<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::i32x4_load_extend_u16x4(ptr::from_ref(t).cast()) }
 }
 
+/// Loads two 32-bit integers and sign extends each one to a 64-bit lane.
+///
 /// Safe wrapper around [`arch::i64x2_load_extend_i32x2`].
 #[target_feature(enable = "simd128")]
 pub fn i64x2_load_extend_i32x2<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::i64x2_load_extend_i32x2(ptr::from_ref(t).cast()) }
 }
 
+/// Loads two 32-bit integers and zero extends each one to a 64-bit lane.
+///
 /// Safe wrapper around [`arch::i64x2_load_extend_u32x2`].
 #[target_feature(enable = "simd128")]
 pub fn i64x2_load_extend_u32x2<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::i64x2_load_extend_u32x2(ptr::from_ref(t).cast()) }
 }
 
+/// Loads eight 8-bit integers and zero extends each one to a 16-bit lane.
+///
 /// Safe wrapper around [`arch::u16x8_load_extend_u8x8`].
 #[target_feature(enable = "simd128")]
 pub fn u16x8_load_extend_u8x8<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::u16x8_load_extend_u8x8(ptr::from_ref(t).cast()) }
 }
 
+/// Loads four 16-bit integers and zero extends each one to a 32-bit lane.
+///
 /// Safe wrapper around [`arch::u32x4_load_extend_u16x4`].
 #[target_feature(enable = "simd128")]
 pub fn u32x4_load_extend_u16x4<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::u32x4_load_extend_u16x4(ptr::from_ref(t).cast()) }
 }
 
+/// Loads two 32-bit integers and zero extends each one to a 64-bit lane.
+///
 /// Safe wrapper around [`arch::u64x2_load_extend_u32x2`].
 #[target_feature(enable = "simd128")]
 pub fn u64x2_load_extend_u32x2<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::u64x2_load_extend_u32x2(ptr::from_ref(t).cast()) }
 }
 
+/// Loads a `v128` vector from the given heap address.
+///
 /// Safe wrapper around [`arch::v128_load`].
 #[target_feature(enable = "simd128")]
 pub fn v128_load<T: Is16BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::v128_load(ptr::from_ref(t).cast()) }
 }
 
+/// Loads a single element and splats to all lanes of a `v128` vector.
+///
 /// Safe wrapper around [`arch::v128_load8_splat`].
 #[target_feature(enable = "simd128")]
 pub fn v128_load8_splat<T: Is1ByteUnaligned>(t: &T) -> v128 {
     unsafe { arch::v128_load8_splat(ptr::from_ref(t).cast()) }
 }
 
+/// Loads a single element and splats to all lanes of a `v128` vector.
+///
 /// Safe wrapper around [`arch::v128_load16_splat`].
 #[target_feature(enable = "simd128")]
 pub fn v128_load16_splat<T: Is2BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::v128_load16_splat(ptr::from_ref(t).cast()) }
 }
 
+/// Loads a single element and splats to all lanes of a `v128` vector.
+///
 /// Safe wrapper around [`arch::v128_load32_splat`].
 #[target_feature(enable = "simd128")]
 pub fn v128_load32_splat<T: Is4BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::v128_load32_splat(ptr::from_ref(t).cast()) }
 }
 
+/// Loads a 32-bit element into the low bits of the vector and sets all other bits to zero.
+///
 /// Safe wrapper around [`arch::v128_load32_zero`].
 #[target_feature(enable = "simd128")]
 pub fn v128_load32_zero<T: Is4BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::v128_load32_zero(ptr::from_ref(t).cast()) }
 }
 
+/// Loads a single element and splats to all lanes of a `v128` vector.
+///
 /// Safe wrapper around [`arch::v128_load64_splat`].
 #[target_feature(enable = "simd128")]
 pub fn v128_load64_splat<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::v128_load64_splat(ptr::from_ref(t).cast()) }
 }
 
+/// Loads a 64-bit element into the low bits of the vector and sets all other bits to zero.
+///
 /// Safe wrapper around [`arch::v128_load64_zero`].
 #[target_feature(enable = "simd128")]
 pub fn v128_load64_zero<T: Is8BytesUnaligned>(t: &T) -> v128 {
     unsafe { arch::v128_load64_zero(ptr::from_ref(t).cast()) }
 }
 
+/// Stores a `v128` vector to the given heap address.
+///
 /// Safe wrapper around [`arch::v128_store`].
 #[target_feature(enable = "simd128")]
 pub fn v128_store<T: Is16BytesUnaligned>(t: &mut T, v: v128) {
