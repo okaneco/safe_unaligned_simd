@@ -24,6 +24,9 @@
 //! - `neon`
 //!
 //! Intrinsics that load / store individual lanes are not designed yet.
+//!
+//! ### `wasm32`
+//! - `simd128`
 #![forbid(missing_docs, non_ascii_idents)]
 #![cfg_attr(not(test), no_std)]
 

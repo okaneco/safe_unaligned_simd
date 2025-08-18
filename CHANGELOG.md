@@ -1,6 +1,6 @@
 # `safe_unaligned_simd` changelog
 
-## Version 0.2.2-rc.1 - 2025-08
+## Version 0.2.2 - 2025-08
 
 Added support for `wasm32` intrinsics under the `simd128` target feature.
 
