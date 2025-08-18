@@ -20,7 +20,7 @@ Platform-intrinsics that take raw pointers have been wrapped in functions that r
 Some functions have variants that are generic over `Cell` array types, which allow for mutation of shared references.
 See the [`cell`](./src/x86/cell.rs) module for an example.
 
-Some example function signatures:
+Example function signatures:
 ```rust
 #[target_feature(enable = "sse")]
 fn _mm_storeu_ps(mem_addr: &mut [f32; 4], a: __m128);
@@ -35,12 +35,23 @@ Currently, there is no plan to implement gather/scatter or masked load/store int
 ### `aarch64` / `arm64ec`
 - `neon`
 
-Some example function signatures:
+Example function signatures:
 ```rust
 #[target_feature(enable = "neon")]
 fn vld2_dup_s8(from: &[i8; 2]) -> int8x8x2_t;
 #[target_feature(enable = "neon")]
 fn vst1q_f64(into: &mut [f64; 2], val: float64x2_t);
+```
+
+### `wasm32`
+- `simd128`
+
+Example function signatures:
+```rust
+#[target_feature(enable = "simd128")]
+pub fn v128_load8_splat<T: Is1ByteUnaligned>(t: &T) -> v128;
+#[target_feature(enable = "simd128")]
+pub fn v128_store<T: Is16BytesUnaligned>(t: &mut T, v: v128);
 ```
 
 ## License
