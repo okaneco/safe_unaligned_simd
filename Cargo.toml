@@ -27,6 +27,8 @@ version = "0.11.0"
 
 [features]
 default = []
+# Enables AVX-512 intrinsics for x86
+avx512 = []
 # Gain access to unstable features which require the nightly compiler
 nightly = []
 
@@ -37,6 +39,6 @@ _assembly_x86 = []
 
 [package.metadata.docs.rs]
 no-default-features = true
-features = [""]
+features = ["avx512"]
 default-target = "x86_64-unknown-linux-gnu"
 targets = ["aarch64-apple-darwin", "aarch64-unknown-linux-gnu", "i686-unknown-linux-gnu", "wasm32-wasip1"]
