@@ -13,9 +13,9 @@ pub use self::sse2::*;
 mod avx;
 pub use self::avx::*;
 
-#[cfg(feature = "avx512f")]
+#[cfg(feature = "avx512")]
 mod avx512f;
-#[cfg(feature = "avx512f")]
+#[cfg(feature = "avx512")]
 pub use self::avx512f::*;
 
 pub mod cell;

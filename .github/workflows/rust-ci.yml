@@ -66,6 +66,7 @@ jobs:
         if: ${{ (matrix.os == 'ubuntu') }}
         id: avx512f_check
         run: |
+          rustc --print=cfg -Ctarget-cpu=native
           if rustc --print=cfg -Ctarget-cpu=native | grep -l 'avx512vl'; then
             echo "PRESENT=yes" >> $GITHUB_OUTPUT
           else
