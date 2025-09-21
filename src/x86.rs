@@ -18,6 +18,11 @@ mod avx512f;
 #[cfg(feature = "avx512")]
 pub use self::avx512f::*;
 
+#[cfg(feature = "avx512")]
+mod avx512vbmi2;
+#[cfg(feature = "avx512")]
+pub use self::avx512vbmi2::*;
+
 pub mod cell;
 
 pub use crate::common_traits::{
