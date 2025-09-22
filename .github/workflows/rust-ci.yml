@@ -279,10 +279,10 @@ jobs:
           cargo miri setup
 
       - name: Test with Miri, Linux 64-bit x86_64 target
-        run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx,+avx512f,+avx512vl" cargo miri test --features _avx_test,avx512 --target x86_64-unknown-linux-gnu
+        run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx,+avx512f,+avx512vl,+avx512bw" cargo miri test --features _avx_test,avx512 --target x86_64-unknown-linux-gnu
 
       - name: Test with Miri, Linux 32-bit x86 target
-        run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx,+avx512f,+avx512vl" cargo miri test --features _avx_test,avx512 --target i686-unknown-linux-gnu
+        run: RUSTFLAGS="-Dwarnings -Ctarget-feature=+avx,+avx512f,+avx512vl,+avx512bw" cargo miri test --features _avx_test,avx512 --target i686-unknown-linux-gnu
 
       - name: Test with Miri, Linux 64-bit aarch64 target
         run: RUSTFLAGS="-Dwarnings" cargo miri test --features nightly --all-features --target aarch64-unknown-linux-gnu
