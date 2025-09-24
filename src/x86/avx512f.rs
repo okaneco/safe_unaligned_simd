@@ -11,9 +11,15 @@ use core::arch::x86_64::{
 use core::ptr;
 
 #[cfg(target_arch = "x86")]
-use crate::x86::{Is128BitsUnaligned, Is256BitsUnaligned, Is512BitsUnaligned};
+use crate::x86::{
+    Is16BitsUnaligned, Is32BitsUnaligned, Is64BitsUnaligned, Is128BitsUnaligned,
+    Is256BitsUnaligned, Is512BitsUnaligned,
+};
 #[cfg(target_arch = "x86_64")]
-use crate::x86_64::{Is128BitsUnaligned, Is256BitsUnaligned, Is512BitsUnaligned};
+use crate::x86_64::{
+    Is16BitsUnaligned, Is32BitsUnaligned, Is64BitsUnaligned, Is128BitsUnaligned,
+    Is256BitsUnaligned, Is512BitsUnaligned,
+};
 
 /// Load contiguous active 32-bit integers from unaligned memory at mem_addr (those with their respective bit set in mask k), and store the results in dst using writemask k (elements are copied from src when the corresponding mask bit is not set).
 ///
@@ -763,6 +769,591 @@ pub fn _mm256_mask_compressstoreu_ps(base_addr: &mut [f32; 8], k: __mmask8, a: _
 #[target_feature(enable = "avx512f")]
 pub fn _mm512_mask_compressstoreu_ps(base_addr: &mut [f32; 16], k: __mmask16, a: __m512) {
     unsafe { arch::_mm512_mask_compressstoreu_ps(base_addr.as_mut_ptr().cast(), k, a) }
+}
+
+/// Convert packed 32-bit integers in a to packed 16-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtepi32_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtepi32_storeu_epi16<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtepi32_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 32-bit integers in a to packed 16-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtepi32_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtepi32_storeu_epi16<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtepi32_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 32-bit integers in a to packed 16-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtepi32_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtepi32_storeu_epi16<T: Is256BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask16,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtepi32_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 32-bit integers in a to packed 8-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtepi32_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtepi32_storeu_epi8<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtepi32_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 32-bit integers in a to packed 8-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtepi32_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtepi32_storeu_epi8<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtepi32_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 32-bit integers in a to packed 8-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtepi32_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtepi32_storeu_epi8<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask16,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtepi32_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 64-bit integers in a to packed 16-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtepi64_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtepi64_storeu_epi16<T: Is32BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtepi64_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 64-bit integers in a to packed 16-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtepi64_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtepi64_storeu_epi16<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtepi64_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 64-bit integers in a to packed 16-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtepi64_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtepi64_storeu_epi16<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtepi64_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+///Convert packed 64-bit integers in a to packed 32-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtepi64_storeu_epi32)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtepi64_storeu_epi32<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtepi64_storeu_epi32(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+///Convert packed 64-bit integers in a to packed 32-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtepi64_storeu_epi32)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtepi64_storeu_epi32<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtepi64_storeu_epi32(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+///Convert packed 64-bit integers in a to packed 32-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtepi64_storeu_epi32)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtepi64_storeu_epi32<T: Is256BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtepi64_storeu_epi32(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 64-bit integers in a to packed 8-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtepi64_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtepi64_storeu_epi8<T: Is16BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtepi64_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 64-bit integers in a to packed 8-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtepi64_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtepi64_storeu_epi8<T: Is32BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtepi64_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed 64-bit integers in a to packed 8-bit integers with truncation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtepi64_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtepi64_storeu_epi8<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtepi64_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 32-bit integers in a to packed 16-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtsepi32_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtsepi32_storeu_epi16<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtsepi32_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 32-bit integers in a to packed 16-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtsepi32_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtsepi32_storeu_epi16<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtsepi32_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 32-bit integers in a to packed 16-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtsepi32_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtsepi32_storeu_epi16<T: Is256BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask16,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtsepi32_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 32-bit integers in a to packed 8-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtsepi32_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtsepi32_storeu_epi8<T: Is32BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtsepi32_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 32-bit integers in a to packed 8-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtsepi32_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtsepi32_storeu_epi8<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtsepi32_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 32-bit integers in a to packed 8-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtsepi32_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtsepi32_storeu_epi8<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask16,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtsepi32_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 64-bit integers in a to packed 16-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtsepi64_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtsepi64_storeu_epi16<T: Is32BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtsepi64_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 64-bit integers in a to packed 16-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtsepi64_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtsepi64_storeu_epi16<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtsepi64_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 64-bit integers in a to packed 16-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtsepi64_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtsepi64_storeu_epi16<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtsepi64_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 64-bit integers in a to packed 32-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtsepi64_storeu_epi32)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtsepi64_storeu_epi32<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtsepi64_storeu_epi32(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 64-bit integers in a to packed 32-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtsepi64_storeu_epi32)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtsepi64_storeu_epi32<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtsepi64_storeu_epi32(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 64-bit integers in a to packed 32-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtsepi64_storeu_epi32)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtsepi64_storeu_epi32<T: Is256BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtsepi64_storeu_epi32(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 64-bit integers in a to packed 8-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtsepi64_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtsepi64_storeu_epi8<T: Is16BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtsepi64_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 64-bit integers in a to packed 8-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtsepi64_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtsepi64_storeu_epi8<T: Is32BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtsepi64_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed signed 64-bit integers in a to packed 8-bit integers with signed saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtsepi64_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtsepi64_storeu_epi8<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtsepi64_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 32-bit integers in a to packed unsigned 16-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtusepi32_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtusepi32_storeu_epi16<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtusepi32_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 32-bit integers in a to packed unsigned 16-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtusepi32_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtusepi32_storeu_epi16<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtusepi32_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 32-bit integers in a to packed 16-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtusepi32_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtusepi32_storeu_epi16<T: Is256BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask16,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtusepi32_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 32-bit integers in a to packed 8-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtusepi32_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtusepi32_storeu_epi8<T: Is32BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtusepi32_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 32-bit integers in a to packed 8-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtusepi32_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtusepi32_storeu_epi8<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtusepi32_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 32-bit integers in a to packed 8-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtusepi32_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtusepi32_storeu_epi8<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask16,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtusepi32_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 64-bit integers in a to packed 16-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtusepi64_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtusepi64_storeu_epi16<T: Is32BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtusepi64_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 64-bit integers in a to packed 16-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtusepi64_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtusepi64_storeu_epi16<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtusepi64_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 64-bit integers in a to packed 16-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtusepi64_storeu_epi16)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtusepi64_storeu_epi16<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtusepi64_storeu_epi16(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 64-bit integers in a to packed 32-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtusepi64_storeu_epi32)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtusepi64_storeu_epi32<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtusepi64_storeu_epi32(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 64-bit integers in a to packed 32-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtusepi64_storeu_epi32)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtusepi64_storeu_epi32<T: Is128BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtusepi64_storeu_epi32(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 64-bit integers in a to packed 32-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtusepi64_storeu_epi32)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtusepi64_storeu_epi32<T: Is256BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtusepi64_storeu_epi32(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 64-bit integers in a to packed 8-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_mask_cvtusepi64_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm_mask_cvtusepi64_storeu_epi8<T: Is16BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m128i,
+) {
+    unsafe { arch::_mm_mask_cvtusepi64_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 64-bit integers in a to packed 8-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_mask_cvtusepi64_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f,avx512vl")]
+pub fn _mm256_mask_cvtusepi64_storeu_epi8<T: Is32BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m256i,
+) {
+    unsafe { arch::_mm256_mask_cvtusepi64_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
+}
+
+/// Convert packed unsigned 64-bit integers in a to packed 8-bit integers with unsigned saturation, and store the active results (those with their respective bit set in writemask k) to unaligned memory at base_addr.
+///
+/// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_mask_cvtusepi64_storeu_epi8)
+#[inline]
+#[target_feature(enable = "avx512f")]
+pub fn _mm512_mask_cvtusepi64_storeu_epi8<T: Is64BitsUnaligned>(
+    base_addr: &mut T,
+    k: __mmask8,
+    a: __m512i,
+) {
+    unsafe { arch::_mm512_mask_cvtusepi64_storeu_epi8(ptr::from_mut(base_addr).cast(), k, a) }
 }
 
 /// Store packed 32-bit integers from a into memory using writemask k.
@@ -2203,6 +2794,726 @@ mod tests {
                     0_f32, 0_f32, 0_f32, 0_f32, 0_f32, 0_f32
                 ]
             );
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtepi32_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi32(9);
+            let mut r = [0u16; 4];
+            super::_mm_mask_cvtepi32_storeu_epi16(&mut r, 0b11111111, a);
+            let e = [9u16; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtepi32_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi32(9);
+            let mut r = arch::_mm_undefined_si128();
+            super::_mm256_mask_cvtepi32_storeu_epi16(&mut r, 0b11111111, a);
+            let e = arch::_mm_set1_epi16(9);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtepi32_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi32(9);
+            let mut r = arch::_mm256_undefined_si256();
+            super::_mm512_mask_cvtepi32_storeu_epi16(&mut r, 0b11111111_11111111, a);
+            let e = arch::_mm256_set1_epi16(9);
+            assert_eq_m256i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtepi32_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi32(9);
+            let mut r = [0u8; 8];
+            super::_mm_mask_cvtepi32_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [9, 9, 9, 9, 0, 0, 0, 0];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtepi32_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi32(9);
+            let mut r = [0u8; 8];
+            super::_mm256_mask_cvtepi32_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [9u8; 8];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtepi32_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi32(9);
+            let mut r = arch::_mm_undefined_si128();
+            super::_mm512_mask_cvtepi32_storeu_epi8(&mut r, 0b11111111_11111111, a);
+            let e = arch::_mm_set1_epi8(9);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtepi64_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi64x(9);
+            let mut r = [0u16; 2];
+            super::_mm_mask_cvtepi64_storeu_epi16(&mut r, 0b11111111, a);
+            let e = [9; 2];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtepi64_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi64x(9);
+            let mut r = [0u16; 4];
+            super::_mm256_mask_cvtepi64_storeu_epi16(&mut r, 0b11111111, a);
+            let e = [9; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtepi64_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi64(9);
+            let mut r = arch::_mm_undefined_si128();
+            super::_mm512_mask_cvtepi64_storeu_epi16(&mut r, 0b11111111, a);
+            let e = arch::_mm_set1_epi16(9);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtepi64_storeu_epi32() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi64x(9);
+            let mut r = [0u32; 2];
+            super::_mm_mask_cvtepi64_storeu_epi32(&mut r, 0b11111111, a);
+            let e = [9; 2];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtepi64_storeu_epi32() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi64x(9);
+            let mut r = arch::_mm_set1_epi32(0);
+            super::_mm256_mask_cvtepi64_storeu_epi32(&mut r, 0b11111111, a);
+            let e = arch::_mm_set_epi32(9, 9, 9, 9);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtepi64_storeu_epi32() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi64(9);
+            let mut r = arch::_mm256_undefined_si256();
+            super::_mm512_mask_cvtepi64_storeu_epi32(&mut r, 0b11111111, a);
+            let e = arch::_mm256_set1_epi32(9);
+            assert_eq_m256i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtepi64_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi64x(9);
+            let mut r = [0u8; 2];
+            super::_mm_mask_cvtepi64_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [9; 2];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtepi64_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi64x(9);
+            let mut r = [0u8; 4];
+            super::_mm256_mask_cvtepi64_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [9; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtepi64_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi64(9);
+            let mut r = [0u8; 8];
+            super::_mm512_mask_cvtepi64_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [9; 8];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtsepi32_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi32(i32::MAX);
+            let mut r = [0i16; 4];
+            super::_mm_mask_cvtsepi32_storeu_epi16(&mut r, 0b11111111, a);
+            let e = [i16::MAX; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtsepi32_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi32(i32::MAX);
+            let mut r = arch::_mm_undefined_si128();
+            super::_mm256_mask_cvtsepi32_storeu_epi16(&mut r, 0b11111111, a);
+            let e = arch::_mm_set1_epi16(i16::MAX);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtsepi32_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi32(i32::MAX);
+            let mut r = arch::_mm256_undefined_si256();
+            super::_mm512_mask_cvtsepi32_storeu_epi16(&mut r, 0b11111111_11111111, a);
+            let e = arch::_mm256_set1_epi16(i16::MAX);
+            assert_eq_m256i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtsepi32_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi32(i32::MAX);
+            let mut r = [0i8; 4];
+            super::_mm_mask_cvtsepi32_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [i8::MAX; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtsepi32_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi32(i32::MAX);
+            let mut r = [0i8; 8];
+            super::_mm256_mask_cvtsepi32_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [i8::MAX; 8];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtsepi32_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi32(i32::MAX);
+            let mut r = arch::_mm_undefined_si128();
+            super::_mm512_mask_cvtsepi32_storeu_epi8(&mut r, 0b11111111_11111111, a);
+            let e = arch::_mm_set1_epi8(i8::MAX);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtsepi64_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi64x(i64::MAX);
+            let mut r = [0i16; 2];
+            super::_mm_mask_cvtsepi64_storeu_epi16(&mut r, 0b11111111, a);
+            let e = [i16::MAX; 2];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtsepi64_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi64x(i64::MAX);
+            let mut r = [0i16; 4];
+            super::_mm256_mask_cvtsepi64_storeu_epi16(&mut r, 0b11111111, a);
+            let e = [i16::MAX; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtsepi64_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi64(i64::MAX);
+            let mut r = arch::_mm_undefined_si128();
+            super::_mm512_mask_cvtsepi64_storeu_epi16(&mut r, 0b11111111, a);
+            let e = arch::_mm_set1_epi16(i16::MAX);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtsepi64_storeu_epi32() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi64x(i64::MAX);
+            let mut r = [0i32; 2];
+            super::_mm_mask_cvtsepi64_storeu_epi32(&mut r, 0b00000011, a);
+            let e = [i32::MAX; 2];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtsepi64_storeu_epi32() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi64x(i64::MAX);
+            let mut r = arch::_mm_set1_epi32(0);
+            super::_mm256_mask_cvtsepi64_storeu_epi32(&mut r, 0b00001111, a);
+            let e = arch::_mm_set1_epi32(i32::MAX);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtsepi64_storeu_epi32() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi64(i64::MAX);
+            let mut r = arch::_mm256_undefined_si256();
+            super::_mm512_mask_cvtsepi64_storeu_epi32(&mut r, 0b11111111, a);
+            let e = arch::_mm256_set1_epi32(i32::MAX);
+            assert_eq_m256i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtsepi64_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi64x(i64::MAX);
+            let mut r = [0i8; 2];
+            super::_mm_mask_cvtsepi64_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [i8::MAX; 2];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtsepi64_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi64x(i64::MAX);
+            let mut r = [0i8; 4];
+            super::_mm256_mask_cvtsepi64_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [i8::MAX; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtsepi64_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi64(i64::MAX);
+            let mut r = [0i8; 8];
+            super::_mm512_mask_cvtsepi64_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [i8::MAX; 8];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtusepi32_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi32(i32::MAX);
+            let mut r = [0u16; 4];
+            super::_mm_mask_cvtusepi32_storeu_epi16(&mut r, 0b11111111, a);
+            let e = [u16::MAX; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtusepi32_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi32(i32::MAX);
+            let mut r = arch::_mm_undefined_si128();
+            super::_mm256_mask_cvtusepi32_storeu_epi16(&mut r, 0b11111111, a);
+            let e = arch::_mm_set1_epi16(u16::MAX as i16);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtusepi32_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi32(i32::MAX);
+            let mut r = arch::_mm256_undefined_si256();
+            super::_mm512_mask_cvtusepi32_storeu_epi16(&mut r, 0b11111111_11111111, a);
+            let e = arch::_mm256_set1_epi16(u16::MAX as i16);
+            assert_eq_m256i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtusepi32_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi32(i32::MAX);
+            let mut r = [0u8; 4];
+            super::_mm_mask_cvtusepi32_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [u8::MAX; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtusepi32_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi32(i32::MAX);
+            let mut r = [0u8; 8];
+            super::_mm256_mask_cvtusepi32_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [u8::MAX; 8];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtusepi32_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi32(i32::MAX);
+            let mut r = arch::_mm_undefined_si128();
+            super::_mm512_mask_cvtusepi32_storeu_epi8(&mut r, 0b11111111_11111111, a);
+            let e = arch::_mm_set1_epi8(u8::MAX as i8);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtusepi64_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi64x(i64::MAX);
+            let mut r = [0u16; 2];
+            super::_mm_mask_cvtusepi64_storeu_epi16(&mut r, 0b11111111, a);
+            let e = [u16::MAX; 2];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtusepi64_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi64x(i64::MAX);
+            let mut r = [0u16; 4];
+            super::_mm256_mask_cvtusepi64_storeu_epi16(&mut r, 0b11111111, a);
+            let e = [u16::MAX; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtusepi64_storeu_epi16() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi64(i64::MAX);
+            let mut r = arch::_mm_undefined_si128();
+            super::_mm512_mask_cvtusepi64_storeu_epi16(&mut r, 0b11111111, a);
+            let e = arch::_mm_set1_epi16(u16::MAX as i16);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtusepi64_storeu_epi32() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi64x(i64::MAX);
+            let mut r = [0u32; 2];
+            super::_mm_mask_cvtusepi64_storeu_epi32(&mut r, 0b00000011, a);
+            let e = [u32::MAX; 2];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtusepi64_storeu_epi32() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi64x(i64::MAX);
+            let mut r = arch::_mm_set1_epi32(0);
+            super::_mm256_mask_cvtusepi64_storeu_epi32(&mut r, 0b00001111, a);
+            let e = arch::_mm_set1_epi32(u32::MAX as i32);
+            assert_eq_m128i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtusepi64_storeu_epi32() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi64(i64::MAX);
+            let mut r = arch::_mm256_undefined_si256();
+            super::_mm512_mask_cvtusepi64_storeu_epi32(&mut r, 0b11111111, a);
+            let e = arch::_mm256_set1_epi32(u32::MAX as i32);
+            assert_eq_m256i(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm_mask_cvtusepi64_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm_set1_epi64x(i64::MAX);
+            let mut r = [0u8; 2];
+            super::_mm_mask_cvtusepi64_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [u8::MAX; 2];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm256_mask_cvtusepi64_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f,avx512vl")]
+        fn test() {
+            let a = arch::_mm256_set1_epi64x(i64::MAX);
+            let mut r = [0u8; 4];
+            super::_mm256_mask_cvtusepi64_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [u8::MAX; 4];
+            assert_eq!(r, e);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore)]
+    fn test_mm512_mask_cvtusepi64_storeu_epi8() {
+        assert!(*CPU_HAS_AVX512VL);
+        unsafe { test() }
+
+        #[target_feature(enable = "avx512f")]
+        fn test() {
+            let a = arch::_mm512_set1_epi64(i64::MAX);
+            let mut r = [0u8; 8];
+            super::_mm512_mask_cvtusepi64_storeu_epi8(&mut r, 0b11111111, a);
+            let e = [u8::MAX; 8];
+            assert_eq!(r, e);
         }
     }
 
