@@ -12,13 +12,13 @@
 //! ## Supported target architectures
 //!
 //! ### `x86` / `x86_64`
-//! - `sse`, `sse2`, `avx`
+//! - `sse`, `sse2`, `avx`, `avx512f`, `avx512vl`, `avx512bw`, `avx512vbmi2`
 //!
 //! Some functions have variants that are generic over `Cell` array types,
 //! which allow for mutation of shared references.
 //!
-//! Currently, there is no plan to implement gather/scatter or masked load/store
-//! intrinsics for this platform.
+//! Currently, there is no plan to implement gather/scatter or `avx2` masked
+//! load/store intrinsics for this platform.
 //!
 //! ### `aarch64`, `arm64ec`
 //! - `neon`
