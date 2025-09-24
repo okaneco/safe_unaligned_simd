@@ -1,10 +1,24 @@
 # `safe_unaligned_simd` changelog
 
+## Version 0.2.3 - 2025-09
+
+Added support for AVX-512 intrinsics on `x86`/`x86_64`.  
+Implemented intrinsics from the following target features:  
+- `avx512f`, `avx512vl`, `avx512bw`, `avx512vbmi2`
+
+### Notable PRs
+
+[`#30`][30] - Implement `AVX-512F` intrinsic support, implement `cvt` intrinsics  
+[`#29`][29] - Implement `AVX-512BW` intrinsics  
+[`#28`][28] - Implement `AVX-512VBMI2` intrinsic support  
+[`#27`][27] - Implement `AVX-512F` intrinsic support, implement `storeu` instrinsics  
+[`#24`][24] - Implement `AVX-512F` intrinsic support, implement `loadu` instrinsics
+
 ## Version 0.2.2 - 2025-08
 
 Added support for `wasm32` intrinsics under the `simd128` target feature.
 
-- [`#12`][12] - Provide intrinsics for wasm32
+[`#12`][12] - Provide intrinsics for wasm32
 
 ## Version 0.2.1 - 2025-07
 
@@ -53,6 +67,11 @@ The functions are located within an architecture's `cell` module.
 
 Initial release
 
+[30]: https://github.com/okaneco/safe_unaligned_simd/pull/30
+[29]: https://github.com/okaneco/safe_unaligned_simd/pull/29
+[28]: https://github.com/okaneco/safe_unaligned_simd/pull/28
+[27]: https://github.com/okaneco/safe_unaligned_simd/pull/27
+[24]: https://github.com/okaneco/safe_unaligned_simd/pull/24
 [12]: https://github.com/okaneco/safe_unaligned_simd/pull/12
 [15]: https://github.com/okaneco/safe_unaligned_simd/pull/15
 [8]: https://github.com/okaneco/safe_unaligned_simd/pull/8
