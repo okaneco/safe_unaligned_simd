@@ -10,7 +10,13 @@ The goal of this crate is to remove the need for "unnecessary `unsafe`" code whe
 
 Platform-intrinsics that take raw pointers have been wrapped in functions that receive Rust reference types as arguments.
 
-**MSRV**: 1.88
+**MSRV**: `1.88`
+
+## Why use this crate?
+
+This crate is compatible with runtime feature detection.
+
+Unlike some other safe architecture intrinsic wrappers, this crate does not lock the user into `#[cfg()]`-gating SIMD code behind compile-time CPU target feature declaration.
 
 ## Supported target architectures
 
@@ -31,6 +37,8 @@ fn _mm256_loadu2_m128(hiaddr: &[f32; 4], loaddr: &[f32; 4]) -> __m256;
 ```
 
 Currently, there is no plan to implement gather/scatter or `avx2` masked load/store intrinsics for this platform.
+
+`avx512` - AVX-512 intrinsics require `rustc 1.89` or later.
 
 ### `aarch64` / `arm64ec`
 - `neon`
