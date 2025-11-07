@@ -62,6 +62,29 @@ pub fn v128_load8_splat<T: Is1ByteUnaligned>(t: &T) -> v128;
 pub fn v128_store<T: Is16BytesUnaligned>(t: &mut T, v: v128);
 ```
 
+## A note on creating mutable array references from slices
+
+Beware of accidentally creating mutable references to temporary arrays.
+
+Rust will implicitly clone an array from a slice and return a mutable reference to that clone if not wrapped properly in parentheses.
+
+```rust
+// Valid mutable array reference creation
+let out_data: &mut [u8; 4] = (&mut chunk[..4]).try_into().unwrap();
+let out_data = TryInto::<&mut [u8; 4]>::try_into(&mut chunk[..4]).unwrap();
+
+// Incorrect creation of a mutable reference: this clones the chunk and returns
+// a mutable reference to the copy. If we modify `out_data` after this point,
+// the changes will not reflect back in our original `chunk` slice.
+// 🚫🈲⛔❌ - Do not use the following line
+let out_data = &mut chunk[..4].try_into().unwrap();
+```
+
+A better solution is to use [`as_mut_array`][as_mut_array] to sidestep this entirely.<br>
+As of the time of this writing (`rustc 1.91`), `as_mut_array` is unstable but in the process of being stabilized.
+
+[as_mut_array]: https://doc.rust-lang.org/stable/std/primitive.slice.html#method.as_mut_array
+
 ## License
 This crate is licensed under either
 - the [MIT License](LICENSE-MIT), or
