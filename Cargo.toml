@@ -29,7 +29,7 @@ version = "0.11.0"
 default = []
 # Enables AVX-512 intrinsics for x86
 avx512 = []
-# Gain access to unstable features which require the nightly compiler
+# Gain access to unstable features which require the nightly compiler (currently unused)
 nightly = []
 
 # Internal feature for target-feature testing
