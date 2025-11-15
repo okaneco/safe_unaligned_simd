@@ -13,6 +13,16 @@ use crate::x86_64::{Is128BitsUnaligned, Is256BitsUnaligned};
 /// (64-bit) floating-point elements) to all elements of the returned vector.
 ///
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_broadcast_pd)
+///
+/// # Note
+///
+/// If you are targeting `rustc 1.90` or later, [use the `std::arch` intrinsic
+/// directly][arch_link] instead of importing this one.
+///
+/// This function is included for legacy purposes, as it was missed in the
+/// initial safe intrinsics stabilization effort.
+///
+/// [arch_link]: https://doc.rust-lang.org/stable/core/arch/x86/fn._mm256_broadcast_pd.html
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_broadcast_pd(mem_addr: &__m128d) -> __m256d {
@@ -27,6 +37,16 @@ pub fn _mm256_broadcast_pd(mem_addr: &__m128d) -> __m256d {
 /// (32-bit) floating-point elements) to all elements of the returned vector.
 ///
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_broadcast_ps)
+///
+/// # Note
+///
+/// If you are targeting `rustc 1.90` or later, [use the `std::arch` intrinsic
+/// directly][arch_link] instead of importing this one.
+///
+/// This function is included for legacy purposes, as it was missed in the
+/// initial safe intrinsics stabilization effort.
+///
+/// [arch_link]: https://doc.rust-lang.org/stable/core/arch/x86/fn._mm256_broadcast_ps.html
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_broadcast_ps(mem_addr: &__m128) -> __m256 {
@@ -41,6 +61,16 @@ pub fn _mm256_broadcast_ps(mem_addr: &__m128) -> __m256 {
 /// to all elements of the returned vector.
 ///
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_broadcast_sd)
+///
+/// # Note
+///
+/// If you are targeting `rustc 1.90` or later, [use the `std::arch` intrinsic
+/// directly][arch_link] instead of importing this one.
+///
+/// This function is included for legacy purposes, as it was missed in the
+/// initial safe intrinsics stabilization effort.
+///
+/// [arch_link]: https://doc.rust-lang.org/stable/core/arch/x86/fn._mm256_broadcast_sd.html
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_broadcast_sd(mem_addr: &f64) -> __m256d {
@@ -55,6 +85,16 @@ pub fn _mm256_broadcast_sd(mem_addr: &f64) -> __m256d {
 /// to all elements of the returned vector.
 ///
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_broadcast_ss)
+///
+/// # Note
+///
+/// If you are targeting `rustc 1.90` or later, [use the `std::arch` intrinsic
+/// directly][arch_link] instead of importing this one.
+///
+/// This function is included for legacy purposes, as it was missed in the
+/// initial safe intrinsics stabilization effort.
+///
+/// [arch_link]: https://doc.rust-lang.org/stable/core/arch/x86/fn._mm_broadcast_ss.html
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm_broadcast_ss(mem_addr: &f32) -> __m128 {
@@ -69,6 +109,16 @@ pub fn _mm_broadcast_ss(mem_addr: &f32) -> __m128 {
 /// to all elements of the returned vector.
 ///
 /// [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_broadcast_ss)
+///
+/// # Note
+///
+/// If you are targeting `rustc 1.90` or later, [use the `std::arch` intrinsic
+/// directly][arch_link] instead of importing this one.
+///
+/// This function is included for legacy purposes, as it was missed in the
+/// initial safe intrinsics stabilization effort.
+///
+/// [arch_link]: https://doc.rust-lang.org/stable/core/arch/x86/fn._mm256_broadcast_ss.html
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_broadcast_ss(mem_addr: &f32) -> __m256 {
