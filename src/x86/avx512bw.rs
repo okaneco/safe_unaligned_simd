@@ -502,7 +502,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm_mask_loadu_epi16() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -520,7 +519,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm_maskz_loadu_epi16() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -551,7 +549,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm256_mask_loadu_epi16() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -571,7 +568,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm256_maskz_loadu_epi16() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -608,7 +604,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm512_mask_loadu_epi16() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -632,7 +627,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm512_maskz_loadu_epi16() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -669,7 +663,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm_mask_loadu_epi8() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -689,7 +682,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm_maskz_loadu_epi8() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -726,7 +718,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm256_mask_loadu_epi8() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -750,7 +741,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm256_maskz_loadu_epi8() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -795,7 +785,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm512_mask_loadu_epi8() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -822,7 +811,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm512_maskz_loadu_epi8() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -1003,7 +991,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm_mask_storeu_epi16() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -1036,7 +1023,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm256_mask_storeu_epi16() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -1071,7 +1057,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm512_mask_storeu_epi16() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -1110,7 +1095,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm_mask_storeu_epi8() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -1145,7 +1129,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm256_mask_storeu_epi8() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
@@ -1184,7 +1167,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)]
     fn test_mm512_mask_storeu_epi8() {
         assert!(*CPU_HAS_AVX512BW);
         unsafe { test() }
