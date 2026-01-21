@@ -9,6 +9,20 @@
 //! Platform-intrinsics that take raw pointers have been wrapped in functions
 //! that receive Rust reference types as arguments.
 //!
+//! ## Safely using platform intrinsics
+//!
+//! Users are responsible for ensuring that the CPU supports the intended target feature.
+//!
+//! Feature detection can be done at compile-time by using `#[cfg]` attributes on functions or at runtime using an `is_[arch]_feature_detected!` macro from `std::arch`.
+//!
+//! `unsafe` is needed to call into functions annotated with `#[target_feature]`, but [it's safe to call other functions with the same target features][rustc-1.86].
+//!
+//! See [the `std::arch` module documentation][stdarch] for a full explanation and [the `rustc` 1.87 release notes][rustc-1.87] for a simple example of runtime feature detection with fallback.
+//!
+//! [rustc-1.86]: https://blog.rust-lang.org/2025/04/03/Rust-1.86.0/#allow-safe-functions-to-be-marked-with-the-target-feature-attribute
+//! [rustc-1.87]: https://blog.rust-lang.org/2025/05/15/Rust-1.87.0/#safe-architecture-intrinsics
+//! [stdarch]: https://doc.rust-lang.org/stable/std/arch/index.html#overview
+//!
 //! ## Supported target architectures
 //!
 //! ### `x86` / `x86_64`
