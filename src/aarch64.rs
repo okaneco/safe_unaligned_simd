@@ -1332,6 +1332,7 @@ mod tests {
                             == core::mem::size_of::<[[$base; LANES]; REGS]>()
                     );
                     // Safety: transmuting a SIMD vector tuple to its array representation.
+                    // See the safety comment for `transmute_copy` in the `test_vld1_from_slice` macro for more details.
                     let result =
                         unsafe { core::mem::transmute_copy::<$ty, [[$base; LANES]; REGS]>(&result) };
                     assert_eq!(result, expected);
