@@ -398,6 +398,75 @@ vld_n_replicate_k! {
 
 vld_n_replicate_k! {
     unsafe: store;
+    // Stores full registers, so 16 bytes per register
+    size: assert_size_16bytes;
+
+    /// Store `u8` data from two registers, with interleaving
+    fn vst2q_u8(_: &[u8; 16][..2] as [u8; 32]) -> uint8x16x2_t;
+    /// Store `i8` data from two registers, with interleaving
+    fn vst2q_s8(_: &[i8; 16][..2] as [i8; 32]) -> int8x16x2_t;
+    /// Store `u16` data from two registers, with interleaving
+    fn vst2q_u16(_: &[u16; 8][..2] as [u16; 16]) -> uint16x8x2_t;
+    /// Store `i16` data from two registers, with interleaving
+    fn vst2q_s16(_: &[i16; 8][..2] as [i16; 16]) -> int16x8x2_t;
+    /// Store `u32` data from two registers, with interleaving
+    fn vst2q_u32(_: &[u32; 4][..2] as [u32; 8]) -> uint32x4x2_t;
+    /// Store `i32` data from two registers, with interleaving
+    fn vst2q_s32(_: &[i32; 4][..2] as [i32; 8]) -> int32x4x2_t;
+    /// Store `f32` data from two registers, with interleaving
+    fn vst2q_f32(_: &[f32; 4][..2] as [f32; 8]) -> float32x4x2_t;
+    /// Store `u64` data from two registers, with interleaving
+    fn vst2q_u64(_: &[u64; 2][..2] as [u64; 4]) -> uint64x2x2_t;
+    /// Store `i64` data from two registers, with interleaving
+    fn vst2q_s64(_: &[i64; 2][..2] as [i64; 4]) -> int64x2x2_t;
+    /// Store `f64` data from two registers, with interleaving
+    fn vst2q_f64(_: &[f64; 2][..2] as [f64; 4]) -> float64x2x2_t;
+
+    /// Store `u8` data from three registers, with interleaving
+    fn vst3q_u8(_: &[u8; 16][..3] as [u8; 48]) -> uint8x16x3_t;
+    /// Store `i8` data from three registers, with interleaving
+    fn vst3q_s8(_: &[i8; 16][..3] as [i8; 48]) -> int8x16x3_t;
+    /// Store `u16` data from three registers, with interleaving
+    fn vst3q_u16(_: &[u16; 8][..3] as [u16; 24]) -> uint16x8x3_t;
+    /// Store `i16` data from three registers, with interleaving
+    fn vst3q_s16(_: &[i16; 8][..3] as [i16; 24]) -> int16x8x3_t;
+    /// Store `u32` data from three registers, with interleaving
+    fn vst3q_u32(_: &[u32; 4][..3] as [u32; 12]) -> uint32x4x3_t;
+    /// Store `i32` data from three registers, with interleaving
+    fn vst3q_s32(_: &[i32; 4][..3] as [i32; 12]) -> int32x4x3_t;
+    /// Store `f32` data from three registers, with interleaving
+    fn vst3q_f32(_: &[f32; 4][..3] as [f32; 12]) -> float32x4x3_t;
+    /// Store `u64` data from three registers, with interleaving
+    fn vst3q_u64(_: &[u64; 2][..3] as [u64; 6]) -> uint64x2x3_t;
+    /// Store `i64` data from three registers, with interleaving
+    fn vst3q_s64(_: &[i64; 2][..3] as [i64; 6]) -> int64x2x3_t;
+    /// Store `f64` data from three registers, with interleaving
+    fn vst3q_f64(_: &[f64; 2][..3] as [f64; 6]) -> float64x2x3_t;
+
+    /// Store `u8` data from four registers, with interleaving
+    fn vst4q_u8(_: &[u8; 16][..4] as [u8; 64]) -> uint8x16x4_t;
+    /// Store `i8` data from four registers, with interleaving
+    fn vst4q_s8(_: &[i8; 16][..4] as [i8; 64]) -> int8x16x4_t;
+    /// Store `u16` data from four registers, with interleaving
+    fn vst4q_u16(_: &[u16; 8][..4] as [u16; 32]) -> uint16x8x4_t;
+    /// Store `i16` data from four registers, with interleaving
+    fn vst4q_s16(_: &[i16; 8][..4] as [i16; 32]) -> int16x8x4_t;
+    /// Store `u32` data from four registers, with interleaving
+    fn vst4q_u32(_: &[u32; 4][..4] as [u32; 16]) -> uint32x4x4_t;
+    /// Store `i32` data from four registers, with interleaving
+    fn vst4q_s32(_: &[i32; 4][..4] as [i32; 16]) -> int32x4x4_t;
+    /// Store `f32` data from four registers, with interleaving
+    fn vst4q_f32(_: &[f32; 4][..4] as [f32; 16]) -> float32x4x4_t;
+    /// Store `u64` data from four registers, with interleaving
+    fn vst4q_u64(_: &[u64; 2][..4] as [u64; 8]) -> uint64x2x4_t;
+    /// Store `i64` data from four registers, with interleaving
+    fn vst4q_s64(_: &[i64; 2][..4] as [i64; 8]) -> int64x2x4_t;
+    /// Store `f64` data from four registers, with interleaving
+    fn vst4q_f64(_: &[f64; 2][..4] as [f64; 8]) -> float64x2x4_t;
+}
+
+vld_n_replicate_k! {
+    unsafe: store;
     // Stores full registers, so 8 bytes per register
     size: assert_size_8bytes;
 
