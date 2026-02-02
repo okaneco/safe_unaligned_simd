@@ -332,7 +332,7 @@ vld_n_replicate_k! {
     // Loads full registers, so 16 bytes per register
     size: assert_size_16bytes;
 
-    /// Load `u8` data to two registers, with de-interleaving
+    /// Load `u8` data to two registers, with de-interleaving.
     fn vld2q_u8(_: &[u8; 16][..2] as [u8; 32]) -> uint8x16x2_t;
     /// Load `i8` data to two registers, with de-interleaving
     fn vld2q_s8(_: &[i8; 16][..2] as [i8; 32]) -> int8x16x2_t;
