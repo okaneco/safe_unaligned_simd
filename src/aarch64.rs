@@ -1344,7 +1344,7 @@ mod tests {
                     const REGS: usize = $regs;
                     const TOTAL: usize = LANES * REGS;
 
-                    // Create interleaved source data: [0, 1, 2, ..., REGS-1, REGS, REGS+1, ...]
+                    // Create interleaved source data: [0, 1, 2, ..., TOTAL]
                     // where element i belongs to register (i % REGS)
                     let source: [$base; TOTAL] = core::array::from_fn(|i| i as $base);
 
