@@ -328,6 +328,17 @@ vld_n_replicate_k! {
 }
 
 vld_n_replicate_k! {
+    unsafe: load;
+    // Loads full registers, so 16 bytes per register
+    size: assert_size_16bytes;
+
+    /// Load `u8` data to three registers, with de-interleaving
+    fn vld3q_u8(_: &[u8; 16][..3] as [u8; 48]) -> uint8x16x3_t;
+    /// Load `i8` data to three registers, with de-interleaving
+    fn vld3q_s8(_: &[u8; 16][..3] as [u8; 48]) -> int8x16x3_t;
+}
+
+vld_n_replicate_k! {
     unsafe: store;
     // Stores full registers, so 8 bytes per register
     size: assert_size_8bytes;
