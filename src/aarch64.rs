@@ -1399,4 +1399,99 @@ mod tests {
     test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_u64, vld4q_u64, u64, arch::uint64x2x4_t, 2, 4);
     test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_s64, vld4q_s64, i64, arch::int64x2x4_t, 2, 4);
     test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_f64, vld4q_f64, f64, arch::float64x2x4_t, 2, 4);
+
+    // Tests for vstNq interleaving stores.
+    // These are the inverse of vldNq: they take separate registers and interleave them into memory.
+    // For example, vst2q takes two registers:
+    // register 0: [a0, a1, ...], register 1: [b0, b1, ...]
+    // and stores them as interleaved: [a0, b0, a1, b1, ...]
+    //
+    // Parameters:
+    // - $testname: name of the test function
+    // - $intrinsic: the intrinsic function to test
+    // - $base: the element type (u8, i16, etc.)
+    // - $ty: the SIMD input type (e.g., uint8x16x2_t)
+    // - $lanes: number of lanes per register
+    // - $regs: number of registers (2, 3, or 4)
+    macro_rules! test_vstNq_interleave {
+        ($(#[$attr:meta])* fn $testname:ident, $intrinsic:ident, $base:ty, $ty:ty, $lanes:expr, $regs:expr) => {
+            #[test]
+            #[cfg(target_feature = "neon")]
+            $(#[$attr])*
+            fn $testname() {
+                fn generate_regs<const LANES: usize, const REGS: usize>(
+                    source: [[$base; LANES]; REGS],
+                ) -> $ty {
+                    assert!(
+                        core::mem::size_of::<$ty>()
+                            == core::mem::size_of::<[[$base; LANES]; REGS]>()
+                    );
+                    // Safety: transmuting array representation to a SIMD vector tuple.
+                    unsafe { core::mem::transmute_copy::<[[$base; LANES]; REGS], $ty>(&source) }
+                }
+
+                #[target_feature(enable = "neon")]
+                fn test() {
+                    const LANES: usize = $lanes;
+                    const REGS: usize = $regs;
+                    const TOTAL: usize = LANES * REGS;
+
+                    // Create source registers where:
+                    // register 0 contains elements 0, REGS, 2*REGS, ...
+                    // register 1 contains elements 1, REGS+1, 2*REGS+1, ...
+                    // etc.
+                    // This is the de-interleaved form.
+                    let source: [[$base; LANES]; REGS] = core::array::from_fn(|reg| {
+                        core::array::from_fn(|lane| (reg + lane * REGS) as $base)
+                    });
+
+                    // Expected result after interleaving store: [0, 1, 2, ..., TOTAL-1]
+                    let expected: [$base; TOTAL] = core::array::from_fn(|i| i as $base);
+
+                    let argument = generate_regs::<LANES, REGS>(source);
+                    let mut result: [$base; TOTAL] = [0 as $base; TOTAL];
+                    super::$intrinsic(&mut result, argument);
+                    assert_eq!(result, expected);
+                }
+
+                unsafe { test() }
+            }
+        };
+    }
+
+    // vst2q tests (2-way interleave, 16-byte registers)
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst2q_u8, vst2q_u8, u8, arch::uint8x16x2_t, 16, 2);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst2q_s8, vst2q_s8, i8, arch::int8x16x2_t, 16, 2);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst2q_u16, vst2q_u16, u16, arch::uint16x8x2_t, 8, 2);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst2q_s16, vst2q_s16, i16, arch::int16x8x2_t, 8, 2);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst2q_u32, vst2q_u32, u32, arch::uint32x4x2_t, 4, 2);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst2q_s32, vst2q_s32, i32, arch::int32x4x2_t, 4, 2);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst2q_f32, vst2q_f32, f32, arch::float32x4x2_t, 4, 2);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst2q_u64, vst2q_u64, u64, arch::uint64x2x2_t, 2, 2);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst2q_s64, vst2q_s64, i64, arch::int64x2x2_t, 2, 2);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst2q_f64, vst2q_f64, f64, arch::float64x2x2_t, 2, 2);
+
+    // vst3q tests (3-way interleave, 16-byte registers)
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_u8, vst3q_u8, u8, arch::uint8x16x3_t, 16, 3);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_s8, vst3q_s8, i8, arch::int8x16x3_t, 16, 3);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_u16, vst3q_u16, u16, arch::uint16x8x3_t, 8, 3);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_s16, vst3q_s16, i16, arch::int16x8x3_t, 8, 3);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_u32, vst3q_u32, u32, arch::uint32x4x3_t, 4, 3);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_s32, vst3q_s32, i32, arch::int32x4x3_t, 4, 3);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_f32, vst3q_f32, f32, arch::float32x4x3_t, 4, 3);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_u64, vst3q_u64, u64, arch::uint64x2x3_t, 2, 3);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_s64, vst3q_s64, i64, arch::int64x2x3_t, 2, 3);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_f64, vst3q_f64, f64, arch::float64x2x3_t, 2, 3);
+
+    // vst4q tests (4-way interleave, 16-byte registers)
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst4q_u8, vst4q_u8, u8, arch::uint8x16x4_t, 16, 4);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst4q_s8, vst4q_s8, i8, arch::int8x16x4_t, 16, 4);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst4q_u16, vst4q_u16, u16, arch::uint16x8x4_t, 8, 4);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst4q_s16, vst4q_s16, i16, arch::int16x8x4_t, 8, 4);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst4q_u32, vst4q_u32, u32, arch::uint32x4x4_t, 4, 4);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst4q_s32, vst4q_s32, i32, arch::int32x4x4_t, 4, 4);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst4q_f32, vst4q_f32, f32, arch::float32x4x4_t, 4, 4);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst4q_u64, vst4q_u64, u64, arch::uint64x2x4_t, 2, 4);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst4q_s64, vst4q_s64, i64, arch::int64x2x4_t, 2, 4);
+    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst4q_f64, vst4q_f64, f64, arch::float64x2x4_t, 2, 4);
 }
