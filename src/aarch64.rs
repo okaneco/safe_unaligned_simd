@@ -335,7 +335,23 @@ vld_n_replicate_k! {
     /// Load `u8` data to three registers, with de-interleaving
     fn vld3q_u8(_: &[u8; 16][..3] as [u8; 48]) -> uint8x16x3_t;
     /// Load `i8` data to three registers, with de-interleaving
-    fn vld3q_s8(_: &[u8; 16][..3] as [u8; 48]) -> int8x16x3_t;
+    fn vld3q_s8(_: &[i8; 16][..3] as [i8; 48]) -> int8x16x3_t;
+    /// Load `u16` data to three registers, with de-interleaving
+    fn vld3q_u16(_: &[u16; 8][..3] as [u16; 24]) -> uint16x8x3_t;
+    /// Load `i16` data to three registers, with de-interleaving
+    fn vld3q_s16(_: &[i16; 8][..3] as [i16; 24]) -> int16x8x3_t;
+    /// Load `u32` data to three registers, with de-interleaving
+    fn vld3q_u32(_: &[u32; 4][..3] as [u32; 12]) -> uint32x4x3_t;
+    /// Load `i32` data to three registers, with de-interleaving
+    fn vld3q_s32(_: &[i32; 4][..3] as [i32; 12]) -> int32x4x3_t;
+    /// Load `f32` data to three registers, with de-interleaving
+    fn vld3q_f32(_: &[f32; 4][..3] as [f32; 12]) -> float32x4x3_t;
+    /// Load `u64` data to three registers, with de-interleaving
+    fn vld3q_u64(_: &[u64; 2][..3] as [u64; 6]) -> uint64x2x3_t;
+    /// Load `i64` data to three registers, with de-interleaving
+    fn vld3q_s64(_: &[i64; 2][..3] as [i64; 6]) -> int64x2x3_t;
+    /// Load `f64` data to three registers, with de-interleaving
+    fn vld3q_f64(_: &[f64; 2][..3] as [f64; 6]) -> float64x2x3_t;
 }
 
 vld_n_replicate_k! {
