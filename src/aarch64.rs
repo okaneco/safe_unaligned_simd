@@ -1235,4 +1235,99 @@ mod tests {
            f64,
            [arch::float64x2_t, arch::float64x2x2_t, arch::float64x2x3_t, arch::float64x2x4_t]
     );
+
+    // Tests for de-interleaving loads (vld2q, vld3q, vld4q).
+    // These load interleaved data and separate it into multiple registers.
+    // For example, vld2q loads [a0, b0, a1, b1, ...] and produces two registers:
+    // register 0: [a0, a1, ...], register 1: [b0, b1, ...]
+    //
+    // Parameters:
+    // - $testname: name of the test function
+    // - $intrinsic: the intrinsic function to test
+    // - $base: the element type (u8, i16, etc.)
+    // - $ty: the SIMD result type (e.g., uint8x16x2_t)
+    // - $lanes: number of lanes per register
+    // - $regs: number of registers (2, 3, or 4)
+    macro_rules! test_vldNq_deinterleave {
+        ($(#[$attr:meta])* fn $testname:ident, $intrinsic:ident, $base:ty, $ty:ty, $lanes:expr, $regs:expr) => {
+            #[test]
+            #[cfg(target_feature = "neon")]
+            $(#[$attr])*
+            fn $testname() {
+                fn assert_eq_regs<const LANES: usize, const REGS: usize>(
+                    result: $ty,
+                    expected: [[$base; LANES]; REGS],
+                ) {
+                    assert!(
+                        core::mem::size_of::<$ty>()
+                            == core::mem::size_of::<[[$base; LANES]; REGS]>()
+                    );
+                    // Safety: transmuting a SIMD vector tuple to its array representation.
+                    let result =
+                        unsafe { core::mem::transmute_copy::<$ty, [[$base; LANES]; REGS]>(&result) };
+                    assert_eq!(result, expected);
+                }
+
+                #[target_feature(enable = "neon")]
+                fn test() {
+                    const LANES: usize = $lanes;
+                    const REGS: usize = $regs;
+                    const TOTAL: usize = LANES * REGS;
+
+                    // Create interleaved source data: [0, 1, 2, ..., REGS-1, REGS, REGS+1, ...]
+                    // where element i belongs to register (i % REGS)
+                    let source: [$base; TOTAL] = core::array::from_fn(|i| i as $base);
+
+                    // Expected result after de-interleaving:
+                    // register 0 gets elements 0, REGS, 2*REGS, ...
+                    // register 1 gets elements 1, REGS+1, 2*REGS+1, ...
+                    // etc.
+                    let expected: [[$base; LANES]; REGS] = core::array::from_fn(|reg| {
+                        core::array::from_fn(|lane| (reg + lane * REGS) as $base)
+                    });
+
+                    let result: $ty = super::$intrinsic(&source);
+                    assert_eq_regs::<LANES, REGS>(result, expected);
+                }
+
+                unsafe { test() }
+            }
+        };
+    }
+
+    // vld2q tests (2-way de-interleave, 16-byte registers)
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld2q_u8, vld2q_u8, u8, arch::uint8x16x2_t, 16, 2);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld2q_s8, vld2q_s8, i8, arch::int8x16x2_t, 16, 2);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld2q_u16, vld2q_u16, u16, arch::uint16x8x2_t, 8, 2);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld2q_s16, vld2q_s16, i16, arch::int16x8x2_t, 8, 2);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld2q_u32, vld2q_u32, u32, arch::uint32x4x2_t, 4, 2);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld2q_s32, vld2q_s32, i32, arch::int32x4x2_t, 4, 2);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld2q_f32, vld2q_f32, f32, arch::float32x4x2_t, 4, 2);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld2q_u64, vld2q_u64, u64, arch::uint64x2x2_t, 2, 2);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld2q_s64, vld2q_s64, i64, arch::int64x2x2_t, 2, 2);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld2q_f64, vld2q_f64, f64, arch::float64x2x2_t, 2, 2);
+
+    // vld3q tests (3-way de-interleave, 16-byte registers)
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_u8, vld3q_u8, u8, arch::uint8x16x3_t, 16, 3);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_s8, vld3q_s8, i8, arch::int8x16x3_t, 16, 3);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_u16, vld3q_u16, u16, arch::uint16x8x3_t, 8, 3);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_s16, vld3q_s16, i16, arch::int16x8x3_t, 8, 3);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_u32, vld3q_u32, u32, arch::uint32x4x3_t, 4, 3);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_s32, vld3q_s32, i32, arch::int32x4x3_t, 4, 3);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_f32, vld3q_f32, f32, arch::float32x4x3_t, 4, 3);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_u64, vld3q_u64, u64, arch::uint64x2x3_t, 2, 3);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_s64, vld3q_s64, i64, arch::int64x2x3_t, 2, 3);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_f64, vld3q_f64, f64, arch::float64x2x3_t, 2, 3);
+
+    // vld4q tests (4-way de-interleave, 16-byte registers)
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_u8, vld4q_u8, u8, arch::uint8x16x4_t, 16, 4);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_s8, vld4q_s8, i8, arch::int8x16x4_t, 16, 4);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_u16, vld4q_u16, u16, arch::uint16x8x4_t, 8, 4);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_s16, vld4q_s16, i16, arch::int16x8x4_t, 8, 4);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_u32, vld4q_u32, u32, arch::uint32x4x4_t, 4, 4);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_s32, vld4q_s32, i32, arch::int32x4x4_t, 4, 4);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_f32, vld4q_f32, f32, arch::float32x4x4_t, 4, 4);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_u64, vld4q_u64, u64, arch::uint64x2x4_t, 2, 4);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_s64, vld4q_s64, i64, arch::int64x2x4_t, 2, 4);
+    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_f64, vld4q_f64, f64, arch::float64x2x4_t, 2, 4);
 }
