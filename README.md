@@ -77,12 +77,15 @@ pub fn v128_store<T: Is16BytesUnaligned>(t: &mut T, v: v128);
 
 ## A note on creating mutable array references from slices
 
+**_tl;dr:_ Use [`as_mut_array`][as_mut_array] to avoid this bug, stable since `1.93`.**
+
 Beware of accidentally creating mutable references to temporary arrays.
 
 Rust will implicitly clone an array from a slice and return a mutable reference to that clone if not wrapped properly in parentheses.
 
 ```rust
 // Valid mutable array reference creation
+let out_data: &mut [u8; 4] = chunk[..4].as_mut_array().unwrap(); // since 1.93
 let out_data: &mut [u8; 4] = (&mut chunk[..4]).try_into().unwrap();
 let out_data = TryInto::<&mut [u8; 4]>::try_into(&mut chunk[..4]).unwrap();
 
@@ -93,10 +96,9 @@ let out_data = TryInto::<&mut [u8; 4]>::try_into(&mut chunk[..4]).unwrap();
 let out_data = &mut chunk[..4].try_into().unwrap();
 ```
 
-A better solution is to use [`as_mut_array`][as_mut_array] to sidestep this entirely.<br>
-As of the time of this writing (`rustc 1.91`), `as_mut_array` is unstable but in the process of being stabilized.
+The now-stable [`as_mut_array`][as_mut_array] sidesteps this issue entirely.<br>
 
-[as_mut_array]: https://doc.rust-lang.org/stable/std/primitive.slice.html#method.as_mut_array
+[as_mut_array]: https://doc.rust-lang.org/1.93.0/std/primitive.slice.html#method.as_mut_array
 
 ## License
 This crate is licensed under either

@@ -44,13 +44,16 @@
 //!
 //! ## A note on creating mutable array references from slices
 //!
+//! **_tl;dr:_ Use [`as_mut_array`][as_mut_array] to avoid this bug, stable since `1.93`.**
+//!
 //! Beware of accidentally creating mutable references to temporary arrays.
 //!
 //! Rust will implicitly clone an array from a slice and return a mutable reference to that clone if not wrapped properly in parentheses.
 //!
-//! ```rust,no_run
+//! ```rust,ignore
 //! # let mut chunk = [0u8; 8];
 //! // Valid mutable array reference creation
+//! let out_data: &mut [u8; 4] = chunk[..4].as_mut_array().unwrap(); // since 1.93
 //! let out_data: &mut [u8; 4] = (&mut chunk[..4]).try_into().unwrap();
 //! let out_data = TryInto::<&mut [u8; 4]>::try_into(&mut chunk[..4]).unwrap();
 //!
@@ -62,10 +65,9 @@
 //! # *out_data = [1u8; 4];
 //! ```
 //!
-//! A better solution is to use [`as_mut_array`][as_mut_array] to sidestep this entirely.<br>
-//! As of the time of this writing (`rustc 1.91`), `as_mut_array` is unstable but in the process of being stabilized.
+//! The now-stable [`as_mut_array`][as_mut_array] sidesteps this issue entirely.<br>
 //!
-//! [as_mut_array]: https://doc.rust-lang.org/stable/std/primitive.slice.html#method.as_mut_array
+//! [as_mut_array]: https://doc.rust-lang.org/1.93.0/std/primitive.slice.html#method.as_mut_array
 #![forbid(missing_docs, non_ascii_idents)]
 #![cfg_attr(not(test), no_std)]
 

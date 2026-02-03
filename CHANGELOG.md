@@ -1,5 +1,14 @@
 # `safe_unaligned_simd` changelog
 
+## Version 0.2.4 - 2026-02
+
+Added support for *n*-element structure loads and stores on `aarch64` NEON (i.e., into `int16x8x3_t`).  
+This provides wrappers for `vldNq` and `vstNq` intrinsics which deinterleave into N registers on load and interleave into memory on store.
+
+### Notable PRs
+
+[`#41`][41] - Add wrappers for NEON interleaved load/store  
+
 ## Version 0.2.3 - 2025-09
 
 Added support for AVX-512 intrinsics on `x86`/`x86_64`.  
@@ -67,6 +76,7 @@ The functions are located within an architecture's `cell` module.
 
 Initial release
 
+[41]: https://github.com/okaneco/safe_unaligned_simd/pull/41
 [30]: https://github.com/okaneco/safe_unaligned_simd/pull/30
 [29]: https://github.com/okaneco/safe_unaligned_simd/pull/29
 [28]: https://github.com/okaneco/safe_unaligned_simd/pull/28
