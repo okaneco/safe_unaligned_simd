@@ -69,6 +69,7 @@ macro_rules! vld_n_replicate_k {
         $([$size:ident])?
     ) => {
         $(#[$meta])*
+        #[inline]
         #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
         #[target_feature(enable = "neon")]
         pub fn $intrinsic(from: &$realty) -> $ret {
@@ -88,6 +89,7 @@ macro_rules! vld_n_replicate_k {
         $([$size:ident])?
     ) => {
         $(#[$meta])*
+        #[inline]
         #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
         #[target_feature(enable = "neon")]
         pub fn $intrinsic(into: &mut $realty, val: $ret) {
