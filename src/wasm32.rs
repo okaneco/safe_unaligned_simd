@@ -187,7 +187,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(not(target_feature = "simd128"), ignore)]
-    pub fn test_i16x8_load_extend_u8x8() {
+    fn test_i16x8_load_extend_u8x8() {
         #[target_feature(enable = "simd128")]
         fn test(a: [u8; 8]) {
             let v = super::u16x8_load_extend_u8x8(&a);
@@ -213,7 +213,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(not(target_feature = "simd128"), ignore)]
-    pub fn test_i32x4_load_extend_u16x4() {
+    fn test_i32x4_load_extend_u16x4() {
         #[target_feature(enable = "simd128")]
         fn test(a: [u16; 4]) {
             let v = super::u32x4_load_extend_u16x4(&a);
@@ -239,7 +239,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(not(target_feature = "simd128"), ignore)]
-    pub fn test_i64x2_load_extend_u32x2() {
+    fn test_i64x2_load_extend_u32x2() {
         #[target_feature(enable = "simd128")]
         fn test(a: [u32; 2]) {
             let v = super::u64x2_load_extend_u32x2(&a);
@@ -252,7 +252,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(not(target_feature = "simd128"), ignore)]
-    pub fn test_u16x8_load_extend_u8x8() {
+    fn test_u16x8_load_extend_u8x8() {
         #[target_feature(enable = "simd128")]
         fn test(a: [u8; 8]) {
             let v = super::u16x8_load_extend_u8x8(&a);
@@ -265,7 +265,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(not(target_feature = "simd128"), ignore)]
-    pub fn test_u32x4_load_extend_u16x4() {
+    fn test_u32x4_load_extend_u16x4() {
         #[target_feature(enable = "simd128")]
         fn test(a: [u16; 4]) {
             let v = super::u32x4_load_extend_u16x4(&a);
@@ -278,7 +278,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(not(target_feature = "simd128"), ignore)]
-    pub fn test_u64x2_load_extend_u32x2() {
+    fn test_u64x2_load_extend_u32x2() {
         #[target_feature(enable = "simd128")]
         fn test(a: [u32; 2]) {
             let v = super::u64x2_load_extend_u32x2(&a);

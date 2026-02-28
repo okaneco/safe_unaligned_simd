@@ -1,5 +1,12 @@
 # `safe_unaligned_simd` changelog
 
+## Version 0.2.5 - 2026-02
+
+Added missing `#[inline]` annotations to aarch64 and wasm32 functions.  
+This improved performance by 2.5-4x for the benchmarks provided in the PR.
+
+[`#44`][44] - Add `#[inline]` to all aarch64 and wasm32 functions  
+
 ## Version 0.2.4 - 2026-02
 
 Added support for *n*-element structure loads and stores on `aarch64` NEON (i.e., into `int16x8x3_t`).  
@@ -76,6 +83,7 @@ The functions are located within an architecture's `cell` module.
 
 Initial release
 
+[44]: https://github.com/okaneco/safe_unaligned_simd/pull/44
 [41]: https://github.com/okaneco/safe_unaligned_simd/pull/41
 [30]: https://github.com/okaneco/safe_unaligned_simd/pull/30
 [29]: https://github.com/okaneco/safe_unaligned_simd/pull/29
