@@ -1476,13 +1476,13 @@ mod tests {
     test_vstNq_interleave!(fn test_vst2q_f64, vst2q_f64, f64, arch::float64x2x2_t, 2, 2);
 
     // vst3q tests (3-way interleave, 16-byte registers)
-    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_u8, vst3q_u8, u8, arch::uint8x16x3_t, 16, 3);
-    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_s8, vst3q_s8, i8, arch::int8x16x3_t, 16, 3);
-    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_u16, vst3q_u16, u16, arch::uint16x8x3_t, 8, 3);
-    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_s16, vst3q_s16, i16, arch::int16x8x3_t, 8, 3);
-    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_u32, vst3q_u32, u32, arch::uint32x4x3_t, 4, 3);
-    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_s32, vst3q_s32, i32, arch::int32x4x3_t, 4, 3);
-    test_vstNq_interleave!(#[cfg_attr(miri, ignore)] fn test_vst3q_f32, vst3q_f32, f32, arch::float32x4x3_t, 4, 3);
+    test_vstNq_interleave!(fn test_vst3q_u8, vst3q_u8, u8, arch::uint8x16x3_t, 16, 3);
+    test_vstNq_interleave!(fn test_vst3q_s8, vst3q_s8, i8, arch::int8x16x3_t, 16, 3);
+    test_vstNq_interleave!(fn test_vst3q_u16, vst3q_u16, u16, arch::uint16x8x3_t, 8, 3);
+    test_vstNq_interleave!(fn test_vst3q_s16, vst3q_s16, i16, arch::int16x8x3_t, 8, 3);
+    test_vstNq_interleave!(fn test_vst3q_u32, vst3q_u32, u32, arch::uint32x4x3_t, 4, 3);
+    test_vstNq_interleave!(fn test_vst3q_s32, vst3q_s32, i32, arch::int32x4x3_t, 4, 3);
+    test_vstNq_interleave!(fn test_vst3q_f32, vst3q_f32, f32, arch::float32x4x3_t, 4, 3);
     test_vstNq_interleave!(fn test_vst3q_u64, vst3q_u64, u64, arch::uint64x2x3_t, 2, 3);
     test_vstNq_interleave!(fn test_vst3q_s64, vst3q_s64, i64, arch::int64x2x3_t, 2, 3);
     test_vstNq_interleave!(fn test_vst3q_f64, vst3q_f64, f64, arch::float64x2x3_t, 2, 3);
