@@ -1387,9 +1387,9 @@ mod tests {
     test_vldNq_deinterleave!(fn test_vld3q_u32, vld3q_u32, u32, arch::uint32x4x3_t, 4, 3);
     test_vldNq_deinterleave!(fn test_vld3q_s32, vld3q_s32, i32, arch::int32x4x3_t, 4, 3);
     test_vldNq_deinterleave!(fn test_vld3q_f32, vld3q_f32, f32, arch::float32x4x3_t, 4, 3);
-    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_u64, vld3q_u64, u64, arch::uint64x2x3_t, 2, 3);
-    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_s64, vld3q_s64, i64, arch::int64x2x3_t, 2, 3);
-    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld3q_f64, vld3q_f64, f64, arch::float64x2x3_t, 2, 3);
+    test_vldNq_deinterleave!(fn test_vld3q_u64, vld3q_u64, u64, arch::uint64x2x3_t, 2, 3);
+    test_vldNq_deinterleave!(fn test_vld3q_s64, vld3q_s64, i64, arch::int64x2x3_t, 2, 3);
+    test_vldNq_deinterleave!(fn test_vld3q_f64, vld3q_f64, f64, arch::float64x2x3_t, 2, 3);
 
     // vld4q tests (4-way de-interleave, 16-byte registers)
     test_vldNq_deinterleave!(fn test_vld4q_u8, vld4q_u8, u8, arch::uint8x16x4_t, 16, 4);
@@ -1399,9 +1399,9 @@ mod tests {
     test_vldNq_deinterleave!(fn test_vld4q_u32, vld4q_u32, u32, arch::uint32x4x4_t, 4, 4);
     test_vldNq_deinterleave!(fn test_vld4q_s32, vld4q_s32, i32, arch::int32x4x4_t, 4, 4);
     test_vldNq_deinterleave!(fn test_vld4q_f32, vld4q_f32, f32, arch::float32x4x4_t, 4, 4);
-    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_u64, vld4q_u64, u64, arch::uint64x2x4_t, 2, 4);
-    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_s64, vld4q_s64, i64, arch::int64x2x4_t, 2, 4);
-    test_vldNq_deinterleave!(#[cfg_attr(miri, ignore)] fn test_vld4q_f64, vld4q_f64, f64, arch::float64x2x4_t, 2, 4);
+    test_vldNq_deinterleave!(fn test_vld4q_u64, vld4q_u64, u64, arch::uint64x2x4_t, 2, 4);
+    test_vldNq_deinterleave!(fn test_vld4q_s64, vld4q_s64, i64, arch::int64x2x4_t, 2, 4);
+    test_vldNq_deinterleave!(fn test_vld4q_f64, vld4q_f64, f64, arch::float64x2x4_t, 2, 4);
 
     // Tests for vstNq interleaving stores.
     // These are the inverse of vldNq: they take separate registers and interleave them into memory.
