@@ -173,7 +173,7 @@ mod tests {
     pub fn test_i16x8_load_extend_u8x8() {
         #[target_feature(enable = "simd128")]
         fn test(a: [u8; 8]) {
-            let v = super::u16x8_load_extend_u8x8(&a);
+            let v = super::i16x8_load_extend_u8x8(&a);
             assert_v128_bytes(v, &a.map(|i| (i as i16).to_ne_bytes()));
         }
 
@@ -199,7 +199,7 @@ mod tests {
     pub fn test_i32x4_load_extend_u16x4() {
         #[target_feature(enable = "simd128")]
         fn test(a: [u16; 4]) {
-            let v = super::u32x4_load_extend_u16x4(&a);
+            let v = super::i32x4_load_extend_u16x4(&a);
             assert_v128_bytes(v, &a.map(|i| (i as i32).to_ne_bytes()));
         }
 
@@ -225,7 +225,7 @@ mod tests {
     pub fn test_i64x2_load_extend_u32x2() {
         #[target_feature(enable = "simd128")]
         fn test(a: [u32; 2]) {
-            let v = super::u64x2_load_extend_u32x2(&a);
+            let v = super::i64x2_load_extend_u32x2(&a);
             assert_v128_bytes(v, &a.map(|i| (i as i64).to_ne_bytes()));
         }
 
