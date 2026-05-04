@@ -57,10 +57,8 @@ impl<T, const N: usize> private::Sealed for core::cell::Cell<[T; N]> where [T; N
 /// [`i8`].
 pub trait Is8CellUnaligned: private::Sealed {}
 
-impl<T, const N: usize> Is8CellUnaligned for [core::cell::Cell<T>; N] where [T; N]: Is16BitsUnaligned
-{}
-impl<T, const N: usize> Is8CellUnaligned for core::cell::Cell<[T; N]> where [T; N]: Is16BitsUnaligned
-{}
+impl<T, const N: usize> Is8CellUnaligned for [core::cell::Cell<T>; N] where [T; N]: Is8BitsUnaligned {}
+impl<T, const N: usize> Is8CellUnaligned for core::cell::Cell<[T; N]> where [T; N]: Is8BitsUnaligned {}
 
 /// A trait that marks a cell-like type as valid for unaligned operations as an
 /// [`i16`].
@@ -157,6 +155,13 @@ impl_N_bits_traits! {
         [i8; 1],
         u8,
         i8,
+    }
+}
+
+impl_N_bits_traits! {
+    impl Is8CellUnaligned [i8] for {
+        core::cell::Cell<u8>,
+        core::cell::Cell<i8>,
     }
 }
 
@@ -322,3 +327,21 @@ const _: () = assert!(size_of::<i128>() == size_of::<__m128i>());
 const _: () = assert!(size_of::<[i128; 2]>() == size_of::<__m256i>());
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 const _: () = assert!(size_of::<[i128; 4]>() == size_of::<__m512i>());
+
+#[cfg(test)]
+mod tests {
+    use super::Is8CellUnaligned;
+    use core::cell::Cell;
+
+    fn assert_is_8_cell_unaligned<T: Is8CellUnaligned>() {}
+
+    #[test]
+    fn is_8_cell_unaligned_covers_8_bit_cells() {
+        assert_is_8_cell_unaligned::<Cell<u8>>();
+        assert_is_8_cell_unaligned::<Cell<i8>>();
+        assert_is_8_cell_unaligned::<[Cell<u8>; 1]>();
+        assert_is_8_cell_unaligned::<[Cell<i8>; 1]>();
+        assert_is_8_cell_unaligned::<Cell<[u8; 1]>>();
+        assert_is_8_cell_unaligned::<Cell<[i8; 1]>>();
+    }
+}
