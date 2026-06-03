@@ -9,6 +9,8 @@ use crate::x86::{Is128BitsUnaligned, Is256BitsUnaligned};
 #[cfg(target_arch = "x86_64")]
 use crate::x86_64::{Is128BitsUnaligned, Is256BitsUnaligned};
 
+use crate::{checked_transmute_read, checked_transmute_store};
+
 /// Broadcasts 128 bits from memory (composed of 2 packed double-precision
 /// (64-bit) floating-point elements) to all elements of the returned vector.
 ///
@@ -136,7 +138,7 @@ pub fn _mm256_broadcast_ss(mem_addr: &f32) -> __m256 {
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_loadu_pd(mem_addr: &[f64; 4]) -> __m256d {
-    unsafe { arch::_mm256_loadu_pd(mem_addr.as_ptr().cast()) }
+    checked_transmute_read(mem_addr)
 }
 
 /// Loads 256-bits (composed of 8 packed single-precision (32-bit)
@@ -146,7 +148,7 @@ pub fn _mm256_loadu_pd(mem_addr: &[f64; 4]) -> __m256d {
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_loadu_ps(mem_addr: &[f32; 8]) -> __m256 {
-    unsafe { arch::_mm256_loadu_ps(mem_addr.as_ptr().cast()) }
+    checked_transmute_read(mem_addr)
 }
 
 /// Loads 256-bits of integer data from memory into result.
@@ -155,7 +157,7 @@ pub fn _mm256_loadu_ps(mem_addr: &[f32; 8]) -> __m256 {
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_loadu_si256<T: Is256BitsUnaligned>(mem_addr: &T) -> __m256i {
-    unsafe { arch::_mm256_loadu_si256(ptr::from_ref(mem_addr).cast()) }
+    checked_transmute_read(mem_addr)
 }
 
 /// Loads two 128-bit values (composed of 4 packed single-precision (32-bit)
@@ -197,7 +199,7 @@ pub fn _mm256_loadu2_m128i<T: Is128BitsUnaligned>(hiaddr: &T, loaddr: &T) -> __m
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_storeu_pd(mem_addr: &mut [f64; 4], a: __m256d) {
-    unsafe { arch::_mm256_storeu_pd(mem_addr.as_mut_ptr().cast(), a) }
+    checked_transmute_store(a, mem_addr)
 }
 
 /// Stores 256-bits (composed of 8 packed single-precision (32-bit)
@@ -207,7 +209,7 @@ pub fn _mm256_storeu_pd(mem_addr: &mut [f64; 4], a: __m256d) {
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_storeu_ps(mem_addr: &mut [f32; 8], a: __m256) {
-    unsafe { arch::_mm256_storeu_ps(mem_addr.as_mut_ptr().cast(), a) }
+    checked_transmute_store(a, mem_addr)
 }
 
 /// Stores 256-bits of integer data from `a` into memory.
@@ -217,7 +219,7 @@ pub fn _mm256_storeu_ps(mem_addr: &mut [f32; 8], a: __m256) {
 #[inline]
 #[target_feature(enable = "avx")]
 pub fn _mm256_storeu_si256<T: Is256BitsUnaligned>(mem_addr: &mut T, a: __m256i) {
-    unsafe { arch::_mm256_storeu_si256(ptr::from_mut(mem_addr).cast(), a) }
+    checked_transmute_store(a, mem_addr)
 }
 
 /// Stores the high and low 128-bit halves (each composed of 4 packed

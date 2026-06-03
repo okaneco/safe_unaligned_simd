@@ -3,6 +3,8 @@ use core::arch::x86::{self as arch, __m128};
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::{self as arch, __m128};
 
+use crate::{checked_transmute_read, checked_transmute_store};
+
 /// Construct a [`__m128`] by duplicating the value read from `mem_addr` into
 /// all elements.
 ///
@@ -46,7 +48,7 @@ pub fn _mm_load_ss(mem_addr: &f32) -> __m128 {
 #[inline]
 #[target_feature(enable = "sse")]
 pub fn _mm_loadu_ps(mem_addr: &[f32; 4]) -> __m128 {
-    unsafe { arch::_mm_loadu_ps(mem_addr.as_ptr()) }
+    checked_transmute_read(mem_addr)
 }
 
 /// Stores the lowest 32-bit float of `a` into memory.
@@ -69,7 +71,7 @@ pub fn _mm_store_ss(mem_addr: &mut f32, a: __m128) {
 #[inline]
 #[target_feature(enable = "sse")]
 pub fn _mm_storeu_ps(mem_addr: &mut [f32; 4], a: __m128) {
-    unsafe { arch::_mm_storeu_ps(mem_addr.as_mut_ptr(), a) }
+    checked_transmute_store(a, mem_addr)
 }
 
 #[cfg(test)]

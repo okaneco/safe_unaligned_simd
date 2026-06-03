@@ -92,3 +92,29 @@ pub mod x86_64 {
     #[cfg(target_arch = "x86_64")]
     pub use crate::x86::*;
 }
+
+#[inline(always)]
+#[allow(dead_code, reason = "Not all arches use this function")]
+pub(crate) fn checked_transmute_read<Src, Dst>(src: &Src) -> Dst {
+    const {
+        assert!(
+            size_of::<Src>() == size_of::<Dst>(),
+            "checked_transmute_read requires source and destination to have the same size"
+        );
+    }
+
+    unsafe { core::ptr::from_ref(src).cast::<Dst>().read_unaligned() }
+}
+
+#[inline(always)]
+#[allow(dead_code, reason = "Not all arches use this function")]
+pub(crate) fn checked_transmute_store<Src, Dst>(src: Src, dst: &mut Dst) {
+    const {
+        assert!(
+            size_of::<Src>() == size_of::<Dst>(),
+            "checked_transmute_store requires source and destination to have the same size"
+        );
+    }
+
+    unsafe { core::ptr::write_unaligned(core::ptr::from_mut(dst).cast::<Src>(), src) }
+}

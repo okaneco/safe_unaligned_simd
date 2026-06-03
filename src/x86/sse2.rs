@@ -9,6 +9,8 @@ use crate::x86::{Is16BitsUnaligned, Is32BitsUnaligned, Is64BitsUnaligned, Is128B
 #[cfg(target_arch = "x86_64")]
 use crate::x86_64::{Is16BitsUnaligned, Is32BitsUnaligned, Is64BitsUnaligned, Is128BitsUnaligned};
 
+use crate::{checked_transmute_read, checked_transmute_store};
+
 /// Loads a double-precision (64-bit) floating-point element from memory
 /// into both elements of returned vector.
 ///
@@ -77,7 +79,7 @@ pub fn _mm_loadl_pd(a: __m128d, mem_addr: &f64) -> __m128d {
 #[inline]
 #[target_feature(enable = "sse2")]
 pub fn _mm_loadu_pd(mem_addr: &[f64; 2]) -> __m128d {
-    unsafe { arch::_mm_loadu_pd(mem_addr.as_ptr()) }
+    checked_transmute_read(mem_addr)
 }
 
 /// Loads 128-bits of integer data from memory into a new vector.
@@ -86,7 +88,7 @@ pub fn _mm_loadu_pd(mem_addr: &[f64; 2]) -> __m128d {
 #[inline]
 #[target_feature(enable = "sse2")]
 pub fn _mm_loadu_si128<T: Is128BitsUnaligned>(mem_addr: &T) -> __m128i {
-    unsafe { arch::_mm_loadu_si128(ptr::from_ref(mem_addr).cast()) }
+    checked_transmute_read(mem_addr)
 }
 
 /// Loads unaligned 16-bits of integer data from memory into new vector.
@@ -162,7 +164,7 @@ pub fn _mm_storel_pd(mem_addr: &mut f64, a: __m128d) {
 #[inline]
 #[target_feature(enable = "sse2")]
 pub fn _mm_storeu_pd(mem_addr: &mut [f64; 2], a: __m128d) {
-    unsafe { arch::_mm_storeu_pd(mem_addr.as_mut_ptr().cast(), a) }
+    checked_transmute_store(a, mem_addr)
 }
 
 /// Stores 128-bits of integer data from `a` into memory.
@@ -171,7 +173,7 @@ pub fn _mm_storeu_pd(mem_addr: &mut [f64; 2], a: __m128d) {
 #[inline]
 #[target_feature(enable = "sse2")]
 pub fn _mm_storeu_si128<T: Is128BitsUnaligned>(mem_addr: &mut T, a: __m128i) {
-    unsafe { arch::_mm_storeu_si128(ptr::from_mut(mem_addr).cast(), a) }
+    checked_transmute_store(a, mem_addr)
 }
 
 /// Store 16-bit integer from the first element of `a` into memory.
